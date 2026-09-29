@@ -32,23 +32,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
-        // 1. Si no hay header o no inicia con 'Bearer ', dejamos pasar la petición al
-        // siguiente filtro
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Extraer el token eliminando la palabra 'Bearer '
         jwt = authHeader.substring(7);
         userEmail = jwService.extractUsername(jwt);
 
-        // 3. Si se extrajo el correo y el usuario no ha sido autenticado en el contexto
-        // actual
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-            // 4. Si el token es válido, registramos la autenticación en el SecurityContext
             if (jwService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
