@@ -14,6 +14,8 @@ import com.gymjf.backend.modules.nutrition.repositories.FavoriteRecipeRepository
 import com.gymjf.backend.modules.nutrition.repositories.RecipeRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ConflictException;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -31,13 +33,13 @@ public class FavoriteRecipeService {
 
     public FavoriteRecipeResponse create(CreateFavoriteRecipeRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         Recipe recipe = recipeRepository.findById(request.getRecipeId())
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Receta no encontrada"));
 
         if (favoriteRecipeRepository.existsByUserIdAndRecipeId(request.getUserId(), request.getRecipeId())) {
-            throw new RuntimeException("La receta ya está en favoritos");
+            throw new ConflictException("La receta ya está en favoritos");
         }
 
         FavoriteRecipe favoriteRecipe = FavoriteRecipe.builder()
@@ -52,7 +54,7 @@ public class FavoriteRecipeService {
 
     public void delete(Integer id) {
         FavoriteRecipe favoriteRecipe = favoriteRecipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Favorito no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Favorito no encontrado"));
         favoriteRecipeRepository.delete(favoriteRecipe);
     }
 

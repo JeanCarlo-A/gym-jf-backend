@@ -15,6 +15,7 @@ import com.gymjf.backend.modules.nutrition.repositories.RecipeIngredientReposito
 import com.gymjf.backend.modules.nutrition.repositories.RecipeRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -38,16 +39,16 @@ public class RecipeIngredientService {
 
     public RecipeIngredientResponse getById(Integer id) {
         RecipeIngredient recipeIngredient = recipeIngredientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ingrediente de receta no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente de receta no encontrado"));
         return mapToResponse(recipeIngredient);
     }
 
     public RecipeIngredientResponse create(CreateRecipeIngredientRequest request) {
         Recipe recipe = recipeRepository.findById(request.getRecipeId())
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Receta no encontrada"));
 
         LocalIngredient ingredient = localIngredientRepository.findById(request.getIngredientId())
-                .orElseThrow(() -> new RuntimeException("Ingrediente no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente no encontrado"));
 
         RecipeIngredient recipeIngredient = RecipeIngredient.builder()
                 .suggestedQuantity(request.getSuggestedQuantity())
@@ -63,7 +64,7 @@ public class RecipeIngredientService {
 
     public RecipeIngredientResponse update(Integer id, UpdateRecipeIngredientRequest request) {
         RecipeIngredient recipeIngredient = recipeIngredientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ingrediente de receta no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente de receta no encontrado"));
 
         if (request.getSuggestedQuantity() != null) {
             recipeIngredient.setSuggestedQuantity(request.getSuggestedQuantity());
@@ -79,7 +80,7 @@ public class RecipeIngredientService {
 
     public void delete(Integer id) {
         RecipeIngredient recipeIngredient = recipeIngredientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ingrediente de receta no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente de receta no encontrado"));
         recipeIngredientRepository.delete(recipeIngredient);
     }
 

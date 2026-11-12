@@ -16,6 +16,7 @@ import com.gymjf.backend.modules.inventory.repositories.OrderRepository;
 import com.gymjf.backend.modules.inventory.repositories.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,16 +40,16 @@ public class OrderDetailService {
 
     public OrderDetailResponse getById(Integer id) {
         OrderDetail orderDetail = orderDetailRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Detalle de pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Detalle de pedido no encontrado"));
         return mapToResponse(orderDetail);
     }
 
     public OrderDetailResponse create(CreateOrderDetailRequest request) {
         Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
 
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
         OrderDetail orderDetail = OrderDetail.builder()
                 .order(order)
@@ -64,7 +65,7 @@ public class OrderDetailService {
 
     public OrderDetailResponse update(Integer id, UpdateOrderDetailRequest request) {
         OrderDetail orderDetail = orderDetailRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Detalle de pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Detalle de pedido no encontrado"));
 
         if (request.getQuantity() != null) {
             orderDetail.setQuantity(request.getQuantity());
@@ -80,7 +81,7 @@ public class OrderDetailService {
 
     public void delete(Integer id) {
         OrderDetail orderDetail = orderDetailRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Detalle de pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Detalle de pedido no encontrado"));
         orderDetailRepository.delete(orderDetail);
     }
 

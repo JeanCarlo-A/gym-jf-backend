@@ -14,6 +14,7 @@ import com.gymjf.backend.modules.biometrics.dtos.UpdateAnthropometricRecordReque
 import com.gymjf.backend.modules.biometrics.repositories.AnthropometricRecordRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -36,14 +37,14 @@ public class AnthropometricRecordService {
 
     public AnthropometricRecordResponse getById(Integer id) {
         AnthropometricRecord record = anthropometricRecordRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ficha antropométrica no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ficha antropométrica no encontrada"));
 
         return mapToResponse(record);
     }
 
     public AnthropometricRecordResponse create(CreateAnthropometricRecordRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         AnthropometricRecord record = AnthropometricRecord.builder()
                 .user(user)
@@ -67,7 +68,7 @@ public class AnthropometricRecordService {
 
     public AnthropometricRecordResponse update(Integer id, UpdateAnthropometricRecordRequest request) {
         AnthropometricRecord record = anthropometricRecordRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ficha antropométrica no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ficha antropométrica no encontrada"));
 
         if (request.getWeight() != null) {
             record.setWeight(request.getWeight());

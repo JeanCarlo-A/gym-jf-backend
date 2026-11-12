@@ -17,6 +17,7 @@ import com.gymjf.backend.modules.billing.repositories.AccountReceivableRepositor
 import com.gymjf.backend.modules.billing.repositories.TransactionRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -40,18 +41,18 @@ public class TransactionService {
 
     public TransactionResponse getById(Integer id) {
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Transacción no encontrada"));
         return mapToResponse(transaction);
     }
 
     public TransactionResponse create(CreateTransactionRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         AccountReceivable accountReceivable = null;
         if (request.getAccountReceivableId() != null) {
             accountReceivable = accountReceivableRepository.findById(request.getAccountReceivableId())
-                    .orElseThrow(() -> new RuntimeException("Cuenta por cobrar no encontrada"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cuenta por cobrar no encontrada"));
         }
 
         Transaction transaction = Transaction.builder()
@@ -73,7 +74,7 @@ public class TransactionService {
 
     public TransactionResponse update(Integer id, UpdateTransactionRequest request) {
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Transacción no encontrada"));
 
         if (request.getValidationStatus() != null) {
             transaction.setValidationStatus(request.getValidationStatus());
@@ -90,7 +91,7 @@ public class TransactionService {
 
     public void delete(Integer id) {
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Transacción no encontrada"));
         transactionRepository.delete(transaction);
     }
 

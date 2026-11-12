@@ -15,6 +15,7 @@ import com.gymjf.backend.modules.billing.dtos.UpdateAccountReceivableRequest;
 import com.gymjf.backend.modules.billing.repositories.AccountReceivableRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +38,13 @@ public class AccountReceivableService {
 
     public AccountReceivableResponse getById(Integer id) {
         AccountReceivable accountReceivable = accountReceivableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cuenta por cobrar no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cuenta por cobrar no encontrada"));
         return mapToResponse(accountReceivable);
     }
 
     public AccountReceivableResponse create(CreateAccountReceivableRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         AccountReceivable accountReceivable = AccountReceivable.builder()
                 .user(user)
@@ -62,7 +63,7 @@ public class AccountReceivableService {
 
     public AccountReceivableResponse update(Integer id, UpdateAccountReceivableRequest request) {
         AccountReceivable accountReceivable = accountReceivableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cuenta por cobrar no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cuenta por cobrar no encontrada"));
 
         if (request.getTotalDebt() != null) {
             accountReceivable.setTotalDebt(request.getTotalDebt());
@@ -83,7 +84,7 @@ public class AccountReceivableService {
 
     public void delete(Integer id) {
         AccountReceivable accountReceivable = accountReceivableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cuenta por cobrar no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cuenta por cobrar no encontrada"));
         accountReceivableRepository.delete(accountReceivable);
     }
 

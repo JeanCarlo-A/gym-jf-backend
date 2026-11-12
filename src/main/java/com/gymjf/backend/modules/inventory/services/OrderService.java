@@ -15,6 +15,7 @@ import com.gymjf.backend.modules.inventory.dtos.UpdateOrderRequest;
 import com.gymjf.backend.modules.inventory.repositories.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +38,13 @@ public class OrderService {
 
     public OrderResponse getById(Integer id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
         return mapToResponse(order);
     }
 
     public OrderResponse create(CreateOrderRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         Order order = Order.builder()
                 .code(request.getCode())
@@ -59,7 +60,7 @@ public class OrderService {
 
     public OrderResponse update(Integer id, UpdateOrderRequest request) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
 
         if (request.getStatus() != null) {
             order.setStatus(request.getStatus());
@@ -75,7 +76,7 @@ public class OrderService {
 
     public void delete(Integer id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
         orderRepository.delete(order);
     }
 

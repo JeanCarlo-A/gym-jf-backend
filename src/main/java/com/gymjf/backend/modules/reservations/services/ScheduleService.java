@@ -12,6 +12,7 @@ import com.gymjf.backend.modules.reservations.dtos.UpdateScheduleRequest;
 import com.gymjf.backend.modules.reservations.repositories.ScheduleRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class ScheduleService {
 
     public ScheduleResponse getById(Integer id) {
         Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Horario no encontrado"));
         return mapToResponse(schedule);
     }
 
@@ -47,7 +48,7 @@ public class ScheduleService {
 
     public ScheduleResponse update(Integer id, UpdateScheduleRequest request) {
         Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Horario no encontrado"));
 
         if (request.getActivity() != null) {
             schedule.setActivity(request.getActivity());
@@ -72,7 +73,7 @@ public class ScheduleService {
 
     public void delete(Integer id) {
         Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Horario no encontrado"));
         scheduleRepository.delete(schedule);
     }
 

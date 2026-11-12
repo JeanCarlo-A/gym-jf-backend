@@ -1,6 +1,11 @@
 package com.gymjf.backend.shared.infrastructure.config;
 
+import java.time.LocalTime;
+
+import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Configuration;
+
+import io.swagger.v3.oas.models.media.StringSchema;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -20,4 +25,11 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
         scheme = "bearer",
         bearerFormat = "JWT")
 public class OpenApiConfig {
+
+    // Swagger no reconoce LocalTime y lo documenta como objeto {hour, minute, ...};
+    // Jackson en realidad lo (de)serializa como texto "HH:mm:ss".
+    static {
+        SpringDocUtils.getConfig().replaceWithSchema(LocalTime.class,
+                new StringSchema().format("time").example("07:00:00"));
+    }
 }

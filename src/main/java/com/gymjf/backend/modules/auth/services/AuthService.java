@@ -10,6 +10,8 @@ import com.gymjf.backend.shared.infrastructure.security.JwService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.gymjf.backend.shared.domain.exceptions.ConflictException;
+import com.gymjf.backend.shared.domain.exceptions.InvalidCredentialsException;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +23,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new ConflictException("El email ya está registrado");
         }
 
         User user = User.builder()
@@ -47,10 +49,10 @@ public class AuthService {
     // --- INICIO DE SESIÓN ---
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
+                .orElseThrow(() -> new InvalidCredentialsException("Credenciales inválidas"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Credenciales inválidas");
+            throw new InvalidCredentialsException("Credenciales inválidas");
         }
 
         String token = jwService.generateToken(user);

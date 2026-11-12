@@ -16,6 +16,7 @@ import com.gymjf.backend.modules.routines.repositories.RoutineExerciseRepository
 import com.gymjf.backend.modules.routines.repositories.RoutineRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,16 +40,16 @@ public class RoutineExerciseService {
 
     public RoutineExerciseResponse getById(Integer id) {
         RoutineExercise routineExercise = routineExerciseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ejercicio de rutina no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ejercicio de rutina no encontrado"));
         return mapToResponse(routineExercise);
     }
 
     public RoutineExerciseResponse create(CreateRoutineExerciseRequest request) {
         Routine routine = routineRepository.findById(request.getRoutineId())
-                .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
 
         Exercise exercise = exerciseRepository.findById(request.getExerciseId())
-                .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado"));
 
         RoutineExercise routineExercise = RoutineExercise.builder()
                 .sets(request.getSets())
@@ -65,7 +66,7 @@ public class RoutineExerciseService {
 
     public RoutineExerciseResponse update(Integer id, UpdateRoutineExerciseRequest request) {
         RoutineExercise routineExercise = routineExerciseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ejercicio de rutina no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ejercicio de rutina no encontrado"));
 
         if (request.getSets() != null) {
             routineExercise.setSets(request.getSets());
@@ -86,7 +87,7 @@ public class RoutineExerciseService {
 
     public void delete(Integer id) {
         RoutineExercise routineExercise = routineExerciseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ejercicio de rutina no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ejercicio de rutina no encontrado"));
         routineExerciseRepository.delete(routineExercise);
     }
 

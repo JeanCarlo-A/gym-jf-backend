@@ -14,6 +14,7 @@ import com.gymjf.backend.modules.routines.dtos.UpdateRoutineRequest;
 import com.gymjf.backend.modules.routines.repositories.RoutineRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -36,13 +37,13 @@ public class RoutineService {
 
     public RoutineResponse getById(Integer id) {
         Routine routine = routineRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
         return mapToResponse(routine);
     }
 
     public RoutineResponse create(CreateRoutineRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         Routine routine = Routine.builder()
                 .routineName(request.getRoutineName())
@@ -57,7 +58,7 @@ public class RoutineService {
 
     public RoutineResponse update(Integer id, UpdateRoutineRequest request) {
         Routine routine = routineRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
 
         if (request.getRoutineName() != null) {
             routine.setRoutineName(request.getRoutineName());
@@ -74,7 +75,7 @@ public class RoutineService {
 
     public void delete(Integer id) {
         Routine routine = routineRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
         routineRepository.delete(routine);
     }
 

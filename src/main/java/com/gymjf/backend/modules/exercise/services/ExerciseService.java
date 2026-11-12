@@ -12,6 +12,7 @@ import com.gymjf.backend.modules.exercise.dtos.UpdateExerciseRequest;
 import com.gymjf.backend.modules.exercise.repositories.ExerciseRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class ExerciseService {
 
     public ExerciseResponse getById(Integer id) {
         Exercise exercise = exerciseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado"));
         return mapToResponse(exercise);
     }
 
@@ -47,7 +48,7 @@ public class ExerciseService {
 
     public ExerciseResponse update(Integer id, UpdateExerciseRequest request) {
         Exercise exercise = exerciseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado"));
 
         if (request.getName() != null) {
             exercise.setName(request.getName());
@@ -76,7 +77,7 @@ public class ExerciseService {
 
     public void delete(Integer id) {
         Exercise exercise = exerciseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado"));
         exerciseRepository.delete(exercise);
     }
 

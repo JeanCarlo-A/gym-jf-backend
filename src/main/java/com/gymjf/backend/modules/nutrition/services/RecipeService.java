@@ -13,6 +13,7 @@ import com.gymjf.backend.modules.nutrition.dtos.UpdateRecipeRequest;
 import com.gymjf.backend.modules.nutrition.repositories.RecipeRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class RecipeService {
 
     public RecipeResponse getById(Integer id) {
         Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Receta no encontrada"));
         return mapToResponse(recipe);
     }
 
@@ -37,7 +38,7 @@ public class RecipeService {
         User user = null;
         if (request.getUserId() != null) {
             user = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         }
 
         Recipe recipe = Recipe.builder()
@@ -57,7 +58,7 @@ public class RecipeService {
 
     public RecipeResponse update(Integer id, UpdateRecipeRequest request) {
         Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Receta no encontrada"));
 
         if (request.getTitle() != null) {
             recipe.setTitle(request.getTitle());
@@ -79,7 +80,7 @@ public class RecipeService {
         }
         if (request.getUserId() != null) {
             User user = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
             recipe.setUser(user);
         }
 
@@ -90,7 +91,7 @@ public class RecipeService {
 
     public void delete(Integer id) {
         Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Receta no encontrada"));
         recipeRepository.delete(recipe);
     }
 

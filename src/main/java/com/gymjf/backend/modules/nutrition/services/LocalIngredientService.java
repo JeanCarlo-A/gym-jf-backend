@@ -11,6 +11,7 @@ import com.gymjf.backend.modules.nutrition.dtos.UpdateLocalIngredientRequest;
 import com.gymjf.backend.modules.nutrition.repositories.LocalIngredientRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ public class LocalIngredientService {
 
     public LocalIngredientResponse getById(Integer id) {
         LocalIngredient ingredient = localIngredientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ingrediente no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente no encontrado"));
         return mapToResponse(ingredient);
     }
 
@@ -43,7 +44,7 @@ public class LocalIngredientService {
 
     public LocalIngredientResponse update(Integer id, UpdateLocalIngredientRequest request) {
         LocalIngredient ingredient = localIngredientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ingrediente no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente no encontrado"));
 
         if (request.getName() != null) {
             ingredient.setName(request.getName());
@@ -59,7 +60,7 @@ public class LocalIngredientService {
 
     public void delete(Integer id) {
         LocalIngredient ingredient = localIngredientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ingrediente no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente no encontrado"));
         localIngredientRepository.delete(ingredient);
     }
 

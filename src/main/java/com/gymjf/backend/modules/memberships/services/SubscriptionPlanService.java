@@ -11,6 +11,7 @@ import com.gymjf.backend.modules.memberships.dtos.UpdateSubscriptionPlanRequest;
 import com.gymjf.backend.modules.memberships.repositories.SubscriptionPlanRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ public class SubscriptionPlanService {
 
     public SubscriptionPlanResponse getById(Integer id) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Plan de suscripción no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Plan de suscripción no encontrado"));
         return mapToResponse(plan);
     }
 
@@ -44,7 +45,7 @@ public class SubscriptionPlanService {
 
     public SubscriptionPlanResponse update(Integer id, UpdateSubscriptionPlanRequest request) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Plan de suscripción no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Plan de suscripción no encontrado"));
 
         if (request.getPlanName() != null) {
             plan.setPlanName(request.getPlanName());
@@ -63,7 +64,7 @@ public class SubscriptionPlanService {
 
     public void delete(Integer id) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Plan de suscripción no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Plan de suscripción no encontrado"));
         subscriptionPlanRepository.delete(plan);
     }
 

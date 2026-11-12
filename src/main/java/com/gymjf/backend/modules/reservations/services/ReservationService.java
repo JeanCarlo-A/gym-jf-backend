@@ -17,6 +17,7 @@ import com.gymjf.backend.modules.reservations.repositories.ReservationRepository
 import com.gymjf.backend.modules.reservations.repositories.ScheduleRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -40,16 +41,16 @@ public class ReservationService {
 
     public ReservationResponse getById(Integer id) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada"));
         return mapToResponse(reservation);
     }
 
     public ReservationResponse create(CreateReservationRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         Schedule schedule = scheduleRepository.findById(request.getScheduleId())
-                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Horario no encontrado"));
 
         Reservation reservation = Reservation.builder()
                 .user(user)
@@ -65,7 +66,7 @@ public class ReservationService {
 
     public ReservationResponse update(Integer id, UpdateReservationRequest request) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada"));
 
         if (request.getReservationDate() != null) {
             reservation.setReservationDate(request.getReservationDate());
@@ -81,7 +82,7 @@ public class ReservationService {
 
     public void delete(Integer id) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada"));
         reservationRepository.delete(reservation);
     }
 

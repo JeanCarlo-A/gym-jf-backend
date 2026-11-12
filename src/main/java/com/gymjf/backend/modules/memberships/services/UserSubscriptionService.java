@@ -16,6 +16,7 @@ import com.gymjf.backend.modules.memberships.repositories.SubscriptionPlanReposi
 import com.gymjf.backend.modules.memberships.repositories.UserSubscriptionRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,16 +40,16 @@ public class UserSubscriptionService {
 
     public UserSubscriptionResponse getById(Integer id) {
         UserSubscription subscription = userSubscriptionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Suscripción no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Suscripción no encontrada"));
         return mapToResponse(subscription);
     }
 
     public UserSubscriptionResponse create(CreateUserSubscriptionRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         SubscriptionPlan plan = subscriptionPlanRepository.findById(request.getPlanId())
-                .orElseThrow(() -> new RuntimeException("Plan de suscripción no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Plan de suscripción no encontrado"));
 
         UserSubscription subscription = UserSubscription.builder()
                 .user(user)
@@ -65,7 +66,7 @@ public class UserSubscriptionService {
 
     public UserSubscriptionResponse update(Integer id, UpdateUserSubscriptionRequest request) {
         UserSubscription subscription = userSubscriptionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Suscripción no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Suscripción no encontrada"));
 
         if (request.getStartDate() != null) {
             subscription.setStartDate(request.getStartDate());
@@ -84,7 +85,7 @@ public class UserSubscriptionService {
 
     public void delete(Integer id) {
         UserSubscription subscription = userSubscriptionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Suscripción no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Suscripción no encontrada"));
         userSubscriptionRepository.delete(subscription);
     }
 

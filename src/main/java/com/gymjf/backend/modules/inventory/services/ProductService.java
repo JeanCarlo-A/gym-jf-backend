@@ -12,6 +12,7 @@ import com.gymjf.backend.modules.inventory.dtos.UpdateProductRequest;
 import com.gymjf.backend.modules.inventory.repositories.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class ProductService {
 
     public ProductResponse getById(Integer id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
         return mapToResponse(product);
     }
 
@@ -48,7 +49,7 @@ public class ProductService {
 
     public ProductResponse update(Integer id, UpdateProductRequest request) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
         if (request.getName() != null) {
             product.setName(request.getName());
@@ -76,7 +77,7 @@ public class ProductService {
 
     public void delete(Integer id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
         productRepository.delete(product);
     }
 
