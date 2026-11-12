@@ -34,3 +34,6 @@ build/
 ### Otros ###
 .env
 *.log
+
+### Entregables del TCU (datos personales del cliente, solo locales) ###
+docs/TCU Gimnacio JF/
