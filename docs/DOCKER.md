@@ -52,11 +52,11 @@ Levanta MySQL y el backend con un solo comando. Todos los comandos se ejecutan *
 | `docker compose exec db mysql -uroot -pgymjf_dev gym_jf` | Abre una consola MySQL dentro del contenedor |
 | `docker compose exec -T db mysql -uroot -pgymjf_dev gym_jf < ruta/script.sql` | Ejecuta un script SQL |
 | `docker compose exec db mysqldump -uroot -pgymjf_dev gym_jf > respaldo.sql` | Respaldo de la BD |
-| `docker compose exec -T db mysql -uroot -pgymjf_dev < "docs/TCU Gimnacio JF/TCU Gimnacio JF/SQL/Datos de prueba.sql"` | Crea los usuarios de prueba (re-ejecutable) |
+| `docker compose exec -T db mysql -uroot -pgymjf_dev < "docker/mysql/sql/Datos de prueba.sql"` | Crea los usuarios de prueba (re-ejecutable) |
 
 **Usuarios de prueba** (tras ejecutar el script de arriba): `admin@gymjf.com` / `Admin123!` (ADMIN) y `cliente@gymjf.com` / `Cliente123!` (CUSTOMER). Hay que ejecutarlo después de cada `down -v`; no se carga solo para no mezclar datos de prueba con el esquema.
 
-### Importante: los scripts de `docs/.../SQL/` solo corren la primera vez
+### Importante: los scripts de `docker/mysql/sql/` solo corren la primera vez
 
 MySQL los ejecuta únicamente cuando el volumen está **vacío**. Si cambias un script SQL (esquema, triggers, procedimientos) y quieres aplicarlo desde cero:
 

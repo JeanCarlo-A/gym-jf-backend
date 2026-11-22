@@ -17,9 +17,9 @@ services:
     volumes:
       - gym_jf_data:/var/lib/mysql
       # Los scripts se ejecutan en orden alfabetico, solo la primera vez (volumen vacio).
-      - "./docs/TCU Gimnacio JF/TCU Gimnacio JF/SQL/DB_Gym_JF.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro"
-      - "./docs/TCU Gimnacio JF/TCU Gimnacio JF/SQL/Indices y Triggers.sql:/docker-entrypoint-initdb.d/02-indices-triggers.sql:ro"
-      - "./docs/TCU Gimnacio JF/TCU Gimnacio JF/SQL/Procedimientos almacenados y Trasacciones.sql:/docker-entrypoint-initdb.d/03-procedimientos.sql:ro"
+      - "./docker/mysql/sql/DB_Gym_JF.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro"
+      - "./docker/mysql/sql/Indices y Triggers.sql:/docker-entrypoint-initdb.d/02-indices-triggers.sql:ro"
+      - "./docker/mysql/sql/Procedimientos almacenados y Trasacciones.sql:/docker-entrypoint-initdb.d/03-procedimientos.sql:ro"
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval: 5s

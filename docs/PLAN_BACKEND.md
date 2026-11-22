@@ -24,7 +24,7 @@ TCU de la UCR para el Gimnasio J.F. Este documento es **solo del backend** (API 
 | T3 | No hay forma de crear un ADMIN (register fuerza CUSTOMER) | Alto |
 | T4 | Sin `@Transactional`; todos los `Update*Request` sin validación; faltan `@Size`/`@Positive`/`@Digits` | Medio |
 | T5 | Desajustes entidad↔SQL: `User` (nombre 100/150, correo 150/100), `Exercise` (nombre 100 vs 45, descripción 100 vs 255) | Medio |
-| T6 | `PUT` cambia el estado de un pago, pero el trigger de saldo es solo `AFTER INSERT` → aprobar un pago no actualiza el saldo | Alto |
+| T6 | `PUT` cambia el estado de un pago, pero el trigger de saldo es solo `AFTER INSERT` → aprobar un pago no actualiza el saldo | ☑ Corregido (2026-11-22): triggers `AFTER UPDATE`/`AFTER DELETE` en `transacciones` |
 | T7 | Sin CORS, perfiles dev/prod, `show-sql` siempre activo, Swagger público, sin paginación, sin actuator, creates devuelven 200 (no 201) | Medio |
 | T8 | Solo 1 test (`contextLoads`, necesita BD viva) | Medio |
 | T9 | `JwtProperties` es código muerto; sin refresh ni logout | Bajo |
@@ -36,7 +36,7 @@ TCU de la UCR para el Gimnasio J.F. Este documento es **solo del backend** (API 
 - **Memberships (RF-7):** tipos de plan (pase diario/promo), `endDate` calculado (7.2), panel de restricciones Libre/Selectiva (7.3), matriz de acceso (7.3.1), pase diario que caduca 00:00 (7.3.2–3), job de vencimiento. El default `ACTIVE` contradice `sp_renovar_suscripcion` (que crea `PENDING`).
 - **Billing (RF-5):** aprobación admin (5.1.4), referencia duplicada + alerta (5.1.5–6), doble confirmación (R-1.3), cierre de caja (5.2.2), filtros (5.2.3), dashboard/reportes (5.3), CxC desde compra/suscripción (5.4.1), umbral de morosidad 15 000 / 30 días + job (5.4.4), suspensión total y bloqueo de check-in (5.4.5), `/me` (5.4.3). Sin validar monto ≤ saldo.
 - **Reservations (RF-2):** disponibilidad por día (2.2.1), cancelación con anticipación (2.2.3, usar `sp_cancelar_reserva`), duplicados, lista de espera (2.3.2), check-in QR (2.4.1), notificación de arribo (2.4.2), contador en vivo (2.4.3), no-show a 20 min (2.5), sanciones (2.5.1), Zumba con fecha y saldo (2.6). Hoy `PUT` salta el aforo y el cliente puede crear reservas `COMPLETED`.
-- **Inventory (RF-6):** descripción/beneficios (6.1.1), filtro por categoría (6.1.3), carrito y método de pago/retiro (6.2), total recalculado y precio tomado del producto, stock coherente en update/delete, estados `EXPIRED`/pagado (6.3.2), expiración 24–48 h con reintegro de stock (6.3.3), alerta de stock bajo (6.4.1), historial de ventas (6.4.2).
+- **Inventory (RF-6):** descripción/beneficios (6.1.1), filtro por categoría (6.1.3), carrito y método de pago/retiro (6.2), total recalculado y precio tomado del producto, (stock coherente en update/delete: ya resuelto con triggers) estados `EXPIRED`/pagado (6.3.2), expiración 24–48 h con reintegro de stock (6.3.3), alerta de stock bajo (6.4.1), historial de ventas (6.4.2).
 - **Routines/Exercise (RF-3.1–3.2):** filtros por grupo muscular y "en casa", búsqueda (3.1.3–4), rutinas "en casa" (3.2.2), plantillas asignables (3.2.3), lectura rutina + ejercicios, orden, duplicados; bug JSON `forHome`/`isForHome`.
 - **Nutrition (RF-4):** "Mi Despensa" (4.2.2), filtros por objetivo y tiempo de comida (4.1.2, 4.3.3), recomendación por objetivo (4.3.1; requiere el objetivo del usuario como enum), sync de favoritos offline (4.3.2), búsqueda de ingredientes, UNIQUE en favoritos y en (receta, ingrediente).
 - **Biometrics (RF-3.3):** altura `DECIMAL(3,2)` implica metros (el doc habla de cm) → decidir y validar; historial comparativo y series para gráficas (3.3.2–3), consentimiento, ownership.
@@ -46,20 +46,20 @@ TCU de la UCR para el Gimnasio J.F. Este documento es **solo del backend** (API 
 
 ## 2. Backlog de evidencias (se hacen primero)
 
-☐ pendiente · ☑ entregada.
+☐ pendiente · ☑ entregada. Los PDFs se numeran `#N` según el orden de subida: E-10 = #5 … E-16 = #11 (ver `Guia para elaborar evidencias.md` en `docs/TCU Gimnacio JF/`).
 
 **Formato de cada PDF:** "Estudiante: Jean Carlo Arias Moya C30721", un párrafo por paso con la redacción de las evidencias anteriores, capturas de Swagger (las toma Claude con Chromium; si la sesión perdió el navegador se reinstala Playwright) y el marcador **"Aquí va la captura de base de datos"** donde se pega la captura de Workbench (`127.0.0.1:3307`, root / `gymjf_dev`).
 
 | ID | Evidencia | Estado | Depende de |
 |---|---|---|---|
 | E-01…E-09 | Las 9 ya entregadas | ☑ | — |
-| E-10 | **Implementación de Docker** (Dockerfile, compose, `up`, Workbench en 3307, `docs/DOCKER.md`) | ☐ | nada — ya funciona |
-| E-11 | Procedimientos almacenados + migración a valores en inglés | ☐ | nada |
-| E-12 | **Reservations** (schedules + reservations; prueba del trigger de aforo) | ☐ | P0.2 |
-| E-13 | **Biometrics** (fichas antropométricas) | ☐ | P0.1 |
-| E-14 | **Nutrition** (recetas, ingredientes, receta-ingredientes, favoritas) | ☐ | P0.1 |
-| E-15 | **Billing** (cuentas por cobrar + transacciones; trigger de saldo) | ☐ | P0.2 |
-| E-16 | **Inventory** (productos, pedidos, detalle; triggers de stock) | ☐ | P0.2 |
+| E-10 | **Implementación de Docker** (Dockerfile, compose, `up`, Workbench en 3307, `docs/DOCKER.md`) | ☑ | nada — ya funciona |
+| E-11 | Procedimientos almacenados + migración a valores en inglés | ☑ | nada |
+| E-12 | **Reservations** (schedules + reservations; prueba del trigger de aforo) | ☑ | P0.2 |
+| E-13 | **Biometrics** (fichas antropométricas) | ☑ | P0.1 |
+| E-14 | **Nutrition** (recetas, ingredientes, receta-ingredientes, favoritas) | ☑ | P0.1 |
+| E-15 | **Billing** (cuentas por cobrar + transacciones; trigger de saldo) | ☑ | P0.2 |
+| E-16 | **Inventory** (productos, pedidos, detalle; triggers de stock) | ☑ | P0.2 |
 
 Las evidencias de fases posteriores se agregan aquí (E-17, E-18…), una por módulo o hito al cerrarlo.
 
@@ -69,9 +69,9 @@ Las evidencias de fases posteriores se agregan aquí (E-17, E-18…), una por m�
 
 ### Fase 0 — Preparar y subir evidencias pendientes (~25 h)
 
-- ☑ **P0.1 Entorno de pruebas (~3 h):** `docker compose up`, crear ADMIN y CUSTOMER de prueba con un script SQL de semilla en `docs/…/SQL/` (resuelve T3 para pruebas), verificar login. *Hecho: `Datos de prueba.sql` (ver [DOCKER.md](DOCKER.md)).*
+- ☑ **P0.1 Entorno de pruebas (~3 h):** `docker compose up`, crear ADMIN y CUSTOMER de prueba con un script SQL de semilla en `docker/mysql/sql/` (resuelve T3 para pruebas), verificar login. *Hecho: `Datos de prueba.sql` (ver [DOCKER.md](DOCKER.md)).*
 - ☑ **P0.2 Arreglo mínimo de errores de trigger (~2 h):** manejar `SQLSTATE 45000` en `GlobalExceptionHandler` (409 con el mensaje en español). Sin esto E-12, E-15 y E-16 mostrarían un 500. *Hecho y probado: aforo y stock responden 409 con el mensaje. Además se corrigió la codificación de los acentos en los triggers dentro de Docker (imagen MySQL propia en `docker/mysql/`).*
-- **P0.3 Redactar y generar E-10…E-16 (~20 h, ~2–3 h por módulo):** CRUD completo en Swagger, capturas, PDF y marcadores para BD. Los bugs que aparezcan se anotan en la bitácora y no se arreglan en esta fase salvo que bloqueen.
+- ☑ **P0.3 Redactar y generar E-10…E-16 (~20 h, ~2–3 h por módulo):** CRUD completo en Swagger, capturas, PDF y marcadores para BD. Los bugs que aparezcan se anotan en la bitácora y no se arreglan en esta fase salvo que bloqueen. *Hecho: los 7 PDFs (#5…#11) generados y subidos el 2026-11-22. Hallazgos: `sp_procesar_pago_sinpe` descontaba el pago dos veces (trigger + procedimiento) y `sp_cancelar_reserva` reemplazaba sus mensajes de negocio por uno genérico; ambos corregidos. Bugs de PUT/DELETE de pagos y detalles de pedido corregidos con triggers (ver bitácora).*
 
 ### Fase 1 — Fundamentos transversales (~28 h)
 
@@ -92,7 +92,7 @@ Orden por prioridad para el cliente. Cada módulo termina con su evidencia.
 |---|---|---|---|---|
 | 2.1 | Auth/Usuarios | `/me` y perfil, objetivo físico (enum), bootstrap admin, consentimiento informado, recuperación de contraseña (requiere correo) | ~18 | E-18 |
 | 2.2 | Memberships | tipos de plan/pase diario, `endDate` calculado, ajustes globales (toggle de restricción), filtro de acceso por plan, caducidad 00:00, job de vencimiento, `sp_renovar_suscripcion` | ~25 | E-19 |
-| 2.3 | Billing | aprobar/rechazar pago (corrige T6), referencia duplicada, monto ≤ saldo, doble confirmación, CxC desde compras/suscripciones, umbral de morosidad + job + bloqueo, cierre de caja, filtros, dashboard/reportes, `sp_procesar_pago_sinpe` | ~35 | E-20 |
+| 2.3 | Billing | aprobar/rechazar pago (el saldo ya se ajusta en la BD, ver T6), referencia duplicada, monto ≤ saldo, doble confirmación, CxC desde compras/suscripciones, umbral de morosidad + job + bloqueo, cierre de caja, filtros, dashboard/reportes, `sp_procesar_pago_sinpe` | ~35 | E-20 |
 | 2.4 | Reservations | disponibilidad, cancelación con anticipación, duplicados, aforo también en update, QR check-in, contador en vivo, no-show + sanciones, lista de espera, Zumba con fecha y saldo | ~35 | E-21 |
 | 2.5 | Inventory | categoría/descripción, carrito + checkout, total y precio desde producto, stock en update/delete, expiración 24–48 h, alerta de stock bajo, historial de ventas | ~25 | E-22 |
 | 2.6 | Routines/Exercise | filtros y búsqueda, "en casa", plantillas asignables, lectura anidada, orden, duplicados | ~10 | E-23 |
@@ -100,7 +100,7 @@ Orden por prioridad para el cliente. Cada módulo termina con su evidencia.
 | 2.8 | Biometrics | unidades/validación, historial comparativo y series para gráficas, consentimiento, ownership | ~6 | E-25 |
 | 2.9 | Integraciones | Supabase Storage (imágenes/comprobantes), Firebase FCM (avisos, arribo, stock bajo, morosidad) | ~15 | E-26 |
 
-**Cambios de esquema** (columna de consentimiento, tabla de ajustes, UNIQUE de favoritos, tipo/fecha en `horarios`): se editan los `.sql` de `docs/…/SQL/`, se agrega una migración re-ejecutable y se recrea con `docker compose down -v` (ver [DOCKER.md](DOCKER.md)). El diccionario puede cambiarse: ya fue aprobado.
+**Cambios de esquema** (columna de consentimiento, tabla de ajustes, UNIQUE de favoritos, tipo/fecha en `horarios`): se editan los `.sql` de `docker/mysql/sql/`, se agrega una migración re-ejecutable y se recrea con `docker compose down -v` (ver [DOCKER.md](DOCKER.md)). El diccionario puede cambiarse: ya fue aprobado.
 
 ### Fase 3 — Cierre del backend (~10 h)
 
@@ -130,13 +130,13 @@ Orden de prioridad si hay que ajustar: Fase 0 → Fase 1 → 2.1 → 2.2 → 2.3
 |---|---|---|---|---|---|---|
 | Auth/Usuarios | ☑ | ☐ | ☐ | ☐ | ☐ | ☑ (E-04, E-06) |
 | Memberships | ☑ | ☐ | ☐ | ☐ | ☐ | ☑ (E-07) |
-| Billing | ☑ | ☐ | ☐ | ☐ | ☐ | ☐ (E-15) |
-| Reservations | ☑ | ☐ | ☐ | ☐ | ☐ | ☐ (E-12) |
-| Inventory | ☑ | ☐ | ☐ | ☐ | ☐ | ☐ (E-16) |
+| Billing | ☑ | ☐ | ☐ | ☐ | ☐ | ☑ (E-15) |
+| Reservations | ☑ | ☐ | ☐ | ☐ | ☐ | ☑ (E-12) |
+| Inventory | ☑ | ☐ | ☐ | ☐ | ☐ | ☑ (E-16) |
 | Routines | ☑ | ☐ | ☐ | ☐ | ☐ | ☑ (E-09) |
 | Exercise | ☑ | ☐ | ☐ | ☐ | ☐ | ☑ (E-08) |
-| Nutrition | ☑ | ☐ | ☐ | ☐ | ☐ | ☐ (E-14) |
-| Biometrics | ☑ | ☐ | ☐ | ☐ | ☐ | ☐ (E-13) |
+| Nutrition | ☑ | ☐ | ☐ | ☐ | ☐ | ☑ (E-14) |
+| Biometrics | ☑ | ☐ | ☐ | ☐ | ☐ | ☑ (E-13) |
 
 El CRUD aparece como hecho porque el código existe; solo está probado donde hay evidencia entregada.
 
@@ -149,7 +149,10 @@ El CRUD aparece como hecho porque el código existe; solo está probado donde ha
 | 2026-11-11 | — | Auditoría completa, Docker funcionando, este plan | — | Subir E-10…E-16 |
 | 2026-11-11 | (anotar horas reales) | P0.1 y P0.2: usuarios de prueba, manejo de errores de triggers (409), arreglo de acentos en Docker | — | P0.3: generar E-10…E-16 |
 
-**Horas acumuladas TCU: 100 / 300** (actualizar en cada fila).
+| 2026-11-12 a 2026-11-22 | (las registra Jean en el sistema de la U) | P0.3: generación e integración de las evidencias E-10…E-16 (PDFs #5…#11), corrección de `sp_procesar_pago_sinpe` y `sp_cancelar_reserva`, PDFs sin comentarios en las capturas de código, `docs/TCU Gimnacio JF/` aplanada (rutas de `docker-compose.yml` actualizadas), guía de evidencias, Spring Boot 4.1.3 | E-10…E-16 (#5…#11, subidas) | Fase 1 |
+| 2026-11-22 | (las registra Jean en el sistema de la U) | Corrección de bugs conocidos: `Indices y Triggers.sql` suma 5 triggers (`trg_actualizar_saldo_cxc_pago_update`, `trg_restaurar_saldo_cxc_pago_delete`, `trg_validar_stock_pedido_update`, `trg_actualizar_stock_pedido_update`, `trg_restaurar_stock_pedido_delete`). Probados con SQL: aprobar/rechazar/editar/eliminar un pago ajusta el saldo y el estado de la cuenta; editar/eliminar un detalle ajusta el stock y rechaza cantidades sin existencias (409) | — | Fase 1 |
+
+**Horas acumuladas TCU:** las lleva Jean en el sistema de la U (el plan partió de 100 / 300).
 
 ---
 
@@ -174,6 +177,6 @@ El CRUD aparece como hecho porque el código existe; solo está probado donde ha
 ## Referencias
 
 - Código: `backend/src/main/java/com/gymjf/backend/{modules,shared}`; seguridad en `shared/infrastructure/security/SecurityConfig.java`; errores en `shared/infrastructure/web/GlobalExceptionHandler.java`.
-- Base de datos: `docs/TCU Gimnacio JF/TCU Gimnacio JF/SQL/*.sql`.
+- Base de datos: `docker/mysql/sql/*.sql` (versionados en el repo).
 - Docker: `docker-compose.yml`, `Dockerfile`, [DOCKER.md](DOCKER.md).
-- Evidencias entregadas (no modificar): `docs/TCU Gimnacio JF/TCU Gimnacio JF/Evidencias (Imagenes)/`.
+- Evidencias entregadas (no modificar): `docs/TCU Gimnacio JF/Evidencias (Imagenes)/`.
