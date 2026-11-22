@@ -16,6 +16,7 @@ import com.gymjf.backend.modules.memberships.repositories.SubscriptionPlanReposi
 import com.gymjf.backend.modules.memberships.repositories.UserSubscriptionRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -23,16 +24,18 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class UserSubscriptionService {
 
     private final UserSubscriptionRepository userSubscriptionRepository;
+    private final CurrentUser currentUser;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final UserRepository userRepository;
 
     public List<UserSubscriptionResponse> getAll() {
-        return userSubscriptionRepository.findAll().stream()
+        return (currentUser.isAdmin() ? userSubscriptionRepository.findAll() : userSubscriptionRepository.findByUserId(currentUser.id())).stream()
                 .map(this::mapToResponse)
                 .toList();
     }
 
     public List<UserSubscriptionResponse> getByUserId(Integer userId) {
+        currentUser.requireOwnerOrAdmin(userId);
         return userSubscriptionRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -41,6 +44,7 @@ public class UserSubscriptionService {
     public UserSubscriptionResponse getById(Integer id) {
         UserSubscription subscription = userSubscriptionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Suscripción no encontrada"));
+        currentUser.requireOwnerOrAdmin(subscription.getUser().getId());
         return mapToResponse(subscription);
     }
 

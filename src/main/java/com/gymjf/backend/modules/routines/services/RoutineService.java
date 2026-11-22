@@ -14,6 +14,7 @@ import com.gymjf.backend.modules.routines.dtos.UpdateRoutineRequest;
 import com.gymjf.backend.modules.routines.repositories.RoutineRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -21,15 +22,17 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class RoutineService {
 
     private final RoutineRepository routineRepository;
+    private final CurrentUser currentUser;
     private final UserRepository userRepository;
 
     public List<RoutineResponse> getAll() {
-        return routineRepository.findAll().stream()
+        return (currentUser.isAdmin() ? routineRepository.findAll() : routineRepository.findByUserId(currentUser.id())).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<RoutineResponse> getByUserId(Integer userId) {
+        currentUser.requireOwnerOrAdmin(userId);
         return routineRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -38,16 +41,18 @@ public class RoutineService {
     public RoutineResponse getById(Integer id) {
         Routine routine = routineRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
+        currentUser.requireOwnerOrAdmin(routine.getUser().getId());
         return mapToResponse(routine);
     }
 
     public RoutineResponse create(CreateRoutineRequest request) {
+        currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         Routine routine = Routine.builder()
                 .routineName(request.getRoutineName())
-                .createdByAdmin(request.getCreatedByAdmin())
+                .createdByAdmin(currentUser.isAdmin() && Boolean.TRUE.equals(request.getCreatedByAdmin()))
                 .user(user)
                 .build();
 
@@ -59,12 +64,13 @@ public class RoutineService {
     public RoutineResponse update(Integer id, UpdateRoutineRequest request) {
         Routine routine = routineRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
+        currentUser.requireOwnerOrAdmin(routine.getUser().getId());
 
         if (request.getRoutineName() != null) {
             routine.setRoutineName(request.getRoutineName());
         }
 
-        if (request.getCreatedByAdmin() != null) {
+        if (request.getCreatedByAdmin() != null && currentUser.isAdmin()) {
             routine.setCreatedByAdmin(request.getCreatedByAdmin());
         }
 
@@ -76,6 +82,7 @@ public class RoutineService {
     public void delete(Integer id) {
         Routine routine = routineRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
+        currentUser.requireOwnerOrAdmin(routine.getUser().getId());
         routineRepository.delete(routine);
     }
 

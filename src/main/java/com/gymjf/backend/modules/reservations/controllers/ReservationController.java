@@ -12,6 +12,7 @@ import com.gymjf.backend.modules.reservations.services.ReservationService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/reservations")
@@ -38,6 +39,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.create(request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ReservationResponse> update(@PathVariable Integer id,
             @Valid @RequestBody UpdateReservationRequest request) {

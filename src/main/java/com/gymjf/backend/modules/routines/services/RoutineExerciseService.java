@@ -16,6 +16,7 @@ import com.gymjf.backend.modules.routines.repositories.RoutineExerciseRepository
 import com.gymjf.backend.modules.routines.repositories.RoutineRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -23,16 +24,20 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class RoutineExerciseService {
 
     private final RoutineExerciseRepository routineExerciseRepository;
+    private final CurrentUser currentUser;
     private final RoutineRepository routineRepository;
     private final ExerciseRepository exerciseRepository;
 
     public List<RoutineExerciseResponse> getAll() {
-        return routineExerciseRepository.findAll().stream()
+        return (currentUser.isAdmin() ? routineExerciseRepository.findAll() : routineExerciseRepository.findByRoutineUserId(currentUser.id())).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<RoutineExerciseResponse> getByRoutineId(Integer routineId) {
+        Routine owner = routineRepository.findById(routineId)
+                .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
+        currentUser.requireOwnerOrAdmin(owner.getUser().getId());
         return routineExerciseRepository.findByRoutineId(routineId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -41,12 +46,14 @@ public class RoutineExerciseService {
     public RoutineExerciseResponse getById(Integer id) {
         RoutineExercise routineExercise = routineExerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio de rutina no encontrado"));
+        currentUser.requireOwnerOrAdmin(routineExercise.getRoutine().getUser().getId());
         return mapToResponse(routineExercise);
     }
 
     public RoutineExerciseResponse create(CreateRoutineExerciseRequest request) {
         Routine routine = routineRepository.findById(request.getRoutineId())
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
+        currentUser.requireOwnerOrAdmin(routine.getUser().getId());
 
         Exercise exercise = exerciseRepository.findById(request.getExerciseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado"));
@@ -67,6 +74,7 @@ public class RoutineExerciseService {
     public RoutineExerciseResponse update(Integer id, UpdateRoutineExerciseRequest request) {
         RoutineExercise routineExercise = routineExerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio de rutina no encontrado"));
+        currentUser.requireOwnerOrAdmin(routineExercise.getRoutine().getUser().getId());
 
         if (request.getSets() != null) {
             routineExercise.setSets(request.getSets());
@@ -88,6 +96,7 @@ public class RoutineExerciseService {
     public void delete(Integer id) {
         RoutineExercise routineExercise = routineExerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio de rutina no encontrado"));
+        currentUser.requireOwnerOrAdmin(routineExercise.getRoutine().getUser().getId());
         routineExerciseRepository.delete(routineExercise);
     }
 

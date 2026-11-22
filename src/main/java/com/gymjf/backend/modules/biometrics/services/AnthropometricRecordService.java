@@ -14,6 +14,7 @@ import com.gymjf.backend.modules.biometrics.dtos.UpdateAnthropometricRecordReque
 import com.gymjf.backend.modules.biometrics.repositories.AnthropometricRecordRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -21,15 +22,17 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class AnthropometricRecordService {
 
     private final AnthropometricRecordRepository anthropometricRecordRepository;
+    private final CurrentUser currentUser;
     private final UserRepository userRepository;
 
     public List<AnthropometricRecordResponse> getAll() {
-        return anthropometricRecordRepository.findAll().stream()
+        return (currentUser.isAdmin() ? anthropometricRecordRepository.findAll() : anthropometricRecordRepository.findByUserIdOrderByRecordDateDesc(currentUser.id())).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<AnthropometricRecordResponse> getByUserId(Integer userId) {
+        currentUser.requireOwnerOrAdmin(userId);
         return anthropometricRecordRepository.findByUserIdOrderByRecordDateDesc(userId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -38,11 +41,13 @@ public class AnthropometricRecordService {
     public AnthropometricRecordResponse getById(Integer id) {
         AnthropometricRecord record = anthropometricRecordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ficha antropométrica no encontrada"));
+        currentUser.requireOwnerOrAdmin(record.getUser().getId());
 
         return mapToResponse(record);
     }
 
     public AnthropometricRecordResponse create(CreateAnthropometricRecordRequest request) {
+        currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
@@ -69,6 +74,7 @@ public class AnthropometricRecordService {
     public AnthropometricRecordResponse update(Integer id, UpdateAnthropometricRecordRequest request) {
         AnthropometricRecord record = anthropometricRecordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ficha antropométrica no encontrada"));
+        currentUser.requireOwnerOrAdmin(record.getUser().getId());
 
         if (request.getWeight() != null) {
             record.setWeight(request.getWeight());
@@ -120,7 +126,10 @@ public class AnthropometricRecordService {
     }
 
     public void delete(Integer id) {
-        anthropometricRecordRepository.deleteById(id);
+        AnthropometricRecord record = anthropometricRecordRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ficha antropométrica no encontrada"));
+        currentUser.requireOwnerOrAdmin(record.getUser().getId());
+        anthropometricRecordRepository.delete(record);
     }
 
     private AnthropometricRecordResponse mapToResponse(AnthropometricRecord entity) {

@@ -12,6 +12,7 @@ import com.gymjf.backend.modules.nutrition.services.RecipeService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/recipes")
@@ -30,17 +31,20 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.getById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<RecipeResponse> create(@Valid @RequestBody CreateRecipeRequest request) {
         return ResponseEntity.ok(recipeService.create(request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<RecipeResponse> update(@PathVariable Integer id,
             @Valid @RequestBody UpdateRecipeRequest request) {
         return ResponseEntity.ok(recipeService.update(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         recipeService.delete(id);

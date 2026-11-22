@@ -8,4 +8,6 @@ import com.gymjf.backend.modules.routines.domain.RoutineExercise;
 
 public interface RoutineExerciseRepository extends JpaRepository<RoutineExercise, Integer> {
     List<RoutineExercise> findByRoutineId(Integer routineId);
+
+    List<RoutineExercise> findByRoutineUserId(Integer userId);
 }

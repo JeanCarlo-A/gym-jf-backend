@@ -15,6 +15,7 @@ import com.gymjf.backend.modules.billing.dtos.UpdateAccountReceivableRequest;
 import com.gymjf.backend.modules.billing.repositories.AccountReceivableRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -22,15 +23,17 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class AccountReceivableService {
 
     private final AccountReceivableRepository accountReceivableRepository;
+    private final CurrentUser currentUser;
     private final UserRepository userRepository;
 
     public List<AccountReceivableResponse> getAll() {
-        return accountReceivableRepository.findAll().stream()
+        return (currentUser.isAdmin() ? accountReceivableRepository.findAll() : accountReceivableRepository.findByUserId(currentUser.id())).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<AccountReceivableResponse> getByUserId(Integer userId) {
+        currentUser.requireOwnerOrAdmin(userId);
         return accountReceivableRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -39,6 +42,7 @@ public class AccountReceivableService {
     public AccountReceivableResponse getById(Integer id) {
         AccountReceivable accountReceivable = accountReceivableRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuenta por cobrar no encontrada"));
+        currentUser.requireOwnerOrAdmin(accountReceivable.getUser().getId());
         return mapToResponse(accountReceivable);
     }
 

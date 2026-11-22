@@ -8,4 +8,6 @@ import com.gymjf.backend.modules.inventory.domain.OrderDetail;
 
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Integer> {
     List<OrderDetail> findByOrderId(Integer orderId);
+
+    List<OrderDetail> findByOrderUserId(Integer userId);
 }

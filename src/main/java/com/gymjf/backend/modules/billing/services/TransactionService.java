@@ -17,6 +17,7 @@ import com.gymjf.backend.modules.billing.repositories.AccountReceivableRepositor
 import com.gymjf.backend.modules.billing.repositories.TransactionRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -24,16 +25,18 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final CurrentUser currentUser;
     private final UserRepository userRepository;
     private final AccountReceivableRepository accountReceivableRepository;
 
     public List<TransactionResponse> getAll() {
-        return transactionRepository.findAll().stream()
+        return (currentUser.isAdmin() ? transactionRepository.findAll() : transactionRepository.findByUserId(currentUser.id())).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<TransactionResponse> getByUserId(Integer userId) {
+        currentUser.requireOwnerOrAdmin(userId);
         return transactionRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -42,6 +45,7 @@ public class TransactionService {
     public TransactionResponse getById(Integer id) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Transacción no encontrada"));
+        currentUser.requireOwnerOrAdmin(transaction.getUser().getId());
         return mapToResponse(transaction);
     }
 

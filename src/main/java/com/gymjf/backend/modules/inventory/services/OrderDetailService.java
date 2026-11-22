@@ -16,6 +16,7 @@ import com.gymjf.backend.modules.inventory.repositories.OrderRepository;
 import com.gymjf.backend.modules.inventory.repositories.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -23,16 +24,20 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class OrderDetailService {
 
     private final OrderDetailRepository orderDetailRepository;
+    private final CurrentUser currentUser;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
 
     public List<OrderDetailResponse> getAll() {
-        return orderDetailRepository.findAll().stream()
+        return (currentUser.isAdmin() ? orderDetailRepository.findAll() : orderDetailRepository.findByOrderUserId(currentUser.id())).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<OrderDetailResponse> getByOrderId(Integer orderId) {
+        Order owner = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
+        currentUser.requireOwnerOrAdmin(owner.getUser().getId());
         return orderDetailRepository.findByOrderId(orderId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -41,12 +46,14 @@ public class OrderDetailService {
     public OrderDetailResponse getById(Integer id) {
         OrderDetail orderDetail = orderDetailRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Detalle de pedido no encontrado"));
+        currentUser.requireOwnerOrAdmin(orderDetail.getOrder().getUser().getId());
         return mapToResponse(orderDetail);
     }
 
     public OrderDetailResponse create(CreateOrderDetailRequest request) {
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
+        currentUser.requireOwnerOrAdmin(order.getUser().getId());
 
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));

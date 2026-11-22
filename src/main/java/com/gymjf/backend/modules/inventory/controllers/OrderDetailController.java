@@ -12,6 +12,7 @@ import com.gymjf.backend.modules.inventory.services.OrderDetailService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/order-details")
@@ -38,12 +39,14 @@ public class OrderDetailController {
         return ResponseEntity.ok(orderDetailService.create(request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<OrderDetailResponse> update(@PathVariable Integer id,
             @Valid @RequestBody UpdateOrderDetailRequest request) {
         return ResponseEntity.ok(orderDetailService.update(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         orderDetailService.delete(id);

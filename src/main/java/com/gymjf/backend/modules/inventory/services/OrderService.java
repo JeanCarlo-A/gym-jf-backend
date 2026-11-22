@@ -15,6 +15,7 @@ import com.gymjf.backend.modules.inventory.dtos.UpdateOrderRequest;
 import com.gymjf.backend.modules.inventory.repositories.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -22,15 +23,17 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final CurrentUser currentUser;
     private final UserRepository userRepository;
 
     public List<OrderResponse> getAll() {
-        return orderRepository.findAll().stream()
+        return (currentUser.isAdmin() ? orderRepository.findAll() : orderRepository.findByUserId(currentUser.id())).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<OrderResponse> getByUserId(Integer userId) {
+        currentUser.requireOwnerOrAdmin(userId);
         return orderRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -39,17 +42,19 @@ public class OrderService {
     public OrderResponse getById(Integer id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
+        currentUser.requireOwnerOrAdmin(order.getUser().getId());
         return mapToResponse(order);
     }
 
     public OrderResponse create(CreateOrderRequest request) {
+        currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         Order order = Order.builder()
                 .code(request.getCode())
                 .total(request.getTotal())
-                .status(request.getStatus() != null ? request.getStatus() : OrderStatus.PENDING)
+                .status(currentUser.isAdmin() && request.getStatus() != null ? request.getStatus() : OrderStatus.PENDING)
                 .user(user)
                 .build();
 

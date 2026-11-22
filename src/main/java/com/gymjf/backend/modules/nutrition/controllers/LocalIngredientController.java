@@ -12,6 +12,7 @@ import com.gymjf.backend.modules.nutrition.services.LocalIngredientService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/local-ingredients")
@@ -30,17 +31,20 @@ public class LocalIngredientController {
         return ResponseEntity.ok(localIngredientService.getById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<LocalIngredientResponse> create(@Valid @RequestBody CreateLocalIngredientRequest request) {
         return ResponseEntity.ok(localIngredientService.create(request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<LocalIngredientResponse> update(@PathVariable Integer id,
             @Valid @RequestBody UpdateLocalIngredientRequest request) {
         return ResponseEntity.ok(localIngredientService.update(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         localIngredientService.delete(id);

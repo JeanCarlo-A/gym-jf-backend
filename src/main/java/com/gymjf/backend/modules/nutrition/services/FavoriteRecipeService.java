@@ -14,6 +14,7 @@ import com.gymjf.backend.modules.nutrition.repositories.FavoriteRecipeRepository
 import com.gymjf.backend.modules.nutrition.repositories.RecipeRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ConflictException;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
@@ -22,16 +23,19 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class FavoriteRecipeService {
 
     private final FavoriteRecipeRepository favoriteRecipeRepository;
+    private final CurrentUser currentUser;
     private final RecipeRepository recipeRepository;
     private final UserRepository userRepository;
 
     public List<FavoriteRecipeResponse> getByUserId(Integer userId) {
+        currentUser.requireOwnerOrAdmin(userId);
         return favoriteRecipeRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
                 .toList();
     }
 
     public FavoriteRecipeResponse create(CreateFavoriteRecipeRequest request) {
+        currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
@@ -55,6 +59,7 @@ public class FavoriteRecipeService {
     public void delete(Integer id) {
         FavoriteRecipe favoriteRecipe = favoriteRecipeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Favorito no encontrado"));
+        currentUser.requireOwnerOrAdmin(favoriteRecipe.getUser().getId());
         favoriteRecipeRepository.delete(favoriteRecipe);
     }
 

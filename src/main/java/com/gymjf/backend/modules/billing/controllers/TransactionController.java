@@ -12,6 +12,7 @@ import com.gymjf.backend.modules.billing.services.TransactionService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -34,11 +35,13 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.getById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody CreateTransactionRequest request) {
         return ResponseEntity.ok(transactionService.create(request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<TransactionResponse> update(
             @PathVariable Integer id,
@@ -46,6 +49,7 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.update(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         transactionService.delete(id);

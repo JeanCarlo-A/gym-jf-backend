@@ -17,6 +17,7 @@ import com.gymjf.backend.modules.reservations.repositories.ReservationRepository
 import com.gymjf.backend.modules.reservations.repositories.ScheduleRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -24,16 +25,18 @@ import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final CurrentUser currentUser;
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
 
     public List<ReservationResponse> getAll() {
-        return reservationRepository.findAll().stream()
+        return (currentUser.isAdmin() ? reservationRepository.findAll() : reservationRepository.findByUserId(currentUser.id())).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<ReservationResponse> getByUserId(Integer userId) {
+        currentUser.requireOwnerOrAdmin(userId);
         return reservationRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -42,10 +45,12 @@ public class ReservationService {
     public ReservationResponse getById(Integer id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada"));
+        currentUser.requireOwnerOrAdmin(reservation.getUser().getId());
         return mapToResponse(reservation);
     }
 
     public ReservationResponse create(CreateReservationRequest request) {
+        currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
@@ -56,7 +61,7 @@ public class ReservationService {
                 .user(user)
                 .schedule(schedule)
                 .reservationDate(request.getReservationDate())
-                .status(request.getStatus() != null ? request.getStatus() : ReservationStatus.PENDING)
+                .status(currentUser.isAdmin() && request.getStatus() != null ? request.getStatus() : ReservationStatus.PENDING)
                 .build();
 
         reservationRepository.save(reservation);
@@ -83,6 +88,7 @@ public class ReservationService {
     public void delete(Integer id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada"));
+        currentUser.requireOwnerOrAdmin(reservation.getUser().getId());
         reservationRepository.delete(reservation);
     }
 

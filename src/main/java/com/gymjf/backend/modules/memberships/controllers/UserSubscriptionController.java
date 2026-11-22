@@ -12,6 +12,7 @@ import com.gymjf.backend.modules.memberships.services.UserSubscriptionService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/user-subscriptions")
@@ -34,17 +35,20 @@ public class UserSubscriptionController {
         return ResponseEntity.ok(userSubscriptionService.getById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<UserSubscriptionResponse> create(@Valid @RequestBody CreateUserSubscriptionRequest request) {
         return ResponseEntity.ok(userSubscriptionService.create(request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<UserSubscriptionResponse> update(@PathVariable Integer id,
             @Valid @RequestBody UpdateUserSubscriptionRequest request) {
         return ResponseEntity.ok(userSubscriptionService.update(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         userSubscriptionService.delete(id);
