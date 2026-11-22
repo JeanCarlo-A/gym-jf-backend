@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.nutrition.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class LocalIngredientController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<LocalIngredientResponse> create(@Valid @RequestBody CreateLocalIngredientRequest request) {
-        return ResponseEntity.ok(localIngredientService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(localIngredientService.create(request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.reservations.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class ScheduleController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<ScheduleResponse> create(@Valid @RequestBody CreateScheduleRequest request) {
-        return ResponseEntity.ok(scheduleService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.create(request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

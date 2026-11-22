@@ -3,6 +3,7 @@ package com.gymjf.backend.modules.memberships.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.memberships.domain.SubscriptionPlan;
 import com.gymjf.backend.modules.memberships.dtos.CreateSubscriptionPlanRequest;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class SubscriptionPlanService {
 
@@ -31,6 +33,7 @@ public class SubscriptionPlanService {
         return mapToResponse(plan);
     }
 
+    @Transactional
     public SubscriptionPlanResponse create(CreateSubscriptionPlanRequest request) {
         SubscriptionPlan plan = SubscriptionPlan.builder()
                 .planName(request.getPlanName())
@@ -43,6 +46,7 @@ public class SubscriptionPlanService {
         return mapToResponse(plan);
     }
 
+    @Transactional
     public SubscriptionPlanResponse update(Integer id, UpdateSubscriptionPlanRequest request) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Plan de suscripción no encontrado"));
@@ -62,6 +66,7 @@ public class SubscriptionPlanService {
         return mapToResponse(plan);
     }
 
+    @Transactional
     public void delete(Integer id) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Plan de suscripción no encontrado"));

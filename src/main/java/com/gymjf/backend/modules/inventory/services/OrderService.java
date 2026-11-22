@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
@@ -19,6 +20,7 @@ import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OrderService {
 
@@ -46,6 +48,7 @@ public class OrderService {
         return mapToResponse(order);
     }
 
+    @Transactional
     public OrderResponse create(CreateOrderRequest request) {
         currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
@@ -63,6 +66,7 @@ public class OrderService {
         return mapToResponse(order);
     }
 
+    @Transactional
     public OrderResponse update(Integer id, UpdateOrderRequest request) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
@@ -79,6 +83,7 @@ public class OrderService {
         return mapToResponse(order);
     }
 
+    @Transactional
     public void delete(Integer id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));

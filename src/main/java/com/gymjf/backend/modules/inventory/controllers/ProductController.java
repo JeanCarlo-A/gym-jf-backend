@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.inventory.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody CreateProductRequest request) {
-        return ResponseEntity.ok(productService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

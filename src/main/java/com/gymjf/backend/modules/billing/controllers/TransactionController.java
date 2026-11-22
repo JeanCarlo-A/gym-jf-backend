@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.billing.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +39,7 @@ public class TransactionController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody CreateTransactionRequest request) {
-        return ResponseEntity.ok(transactionService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.create(request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

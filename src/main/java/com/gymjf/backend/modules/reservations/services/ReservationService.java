@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
@@ -21,6 +22,7 @@ import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReservationService {
 
@@ -49,6 +51,7 @@ public class ReservationService {
         return mapToResponse(reservation);
     }
 
+    @Transactional
     public ReservationResponse create(CreateReservationRequest request) {
         currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
@@ -69,6 +72,7 @@ public class ReservationService {
         return mapToResponse(reservation);
     }
 
+    @Transactional
     public ReservationResponse update(Integer id, UpdateReservationRequest request) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada"));
@@ -85,6 +89,7 @@ public class ReservationService {
         return mapToResponse(reservation);
     }
 
+    @Transactional
     public void delete(Integer id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada"));

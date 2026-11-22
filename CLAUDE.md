@@ -47,6 +47,7 @@ Convenciones de los servicios (ver `ReservationService` como referencia):
 - Los controladores nunca devuelven entidades: los servicios mapean a `*Response` con un `mapToResponse` privado y construyen entidades con `builder()`.
 - Las relaciones se referencian por id en los DTOs (`userId`, `scheduleId`); el servicio resuelve la entidad y lanza `ResourceNotFoundException` con mensaje en español si no existe.
 - `Update*Request` son parciales: solo se aplican los campos no nulos.
+- Validación: los `Create*`/`Update*Request` llevan `@Size`/`@Positive`/`@Digits` según las columnas del SQL (la altura va en metros, `DECIMAL(3,2)`); al agregar un campo, copiar el límite de la columna. Los servicios son `@Transactional(readOnly = true)` y los métodos de escritura `@Transactional`; los POST de creación responden 201.
 - Los módulos se acoplan entre sí a nivel de repositorio/entidad (p. ej. `reservations` usa `auth.UserRepository`).
 
 ### shared/

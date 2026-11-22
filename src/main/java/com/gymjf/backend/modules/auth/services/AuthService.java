@@ -10,10 +10,12 @@ import com.gymjf.backend.shared.infrastructure.security.JwService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.gymjf.backend.shared.domain.exceptions.ConflictException;
 import com.gymjf.backend.shared.domain.exceptions.InvalidCredentialsException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -21,6 +23,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwService jwService;
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ConflictException("El email ya está registrado");

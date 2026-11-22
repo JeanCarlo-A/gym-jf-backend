@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.exercise.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class ExerciseController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<ExerciseResponse> create(@Valid @RequestBody CreateExerciseRequest request) {
-        return ResponseEntity.ok(exerciseService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(exerciseService.create(request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.reservations.domain.Schedule;
 import com.gymjf.backend.modules.reservations.dtos.CreateScheduleRequest;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ScheduleService {
 
@@ -32,6 +34,7 @@ public class ScheduleService {
         return mapToResponse(schedule);
     }
 
+    @Transactional
     public ScheduleResponse create(CreateScheduleRequest request) {
         Schedule schedule = Schedule.builder()
                 .activity(request.getActivity())
@@ -46,6 +49,7 @@ public class ScheduleService {
         return mapToResponse(schedule);
     }
 
+    @Transactional
     public ScheduleResponse update(Integer id, UpdateScheduleRequest request) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Horario no encontrado"));
@@ -71,6 +75,7 @@ public class ScheduleService {
         return mapToResponse(schedule);
     }
 
+    @Transactional
     public void delete(Integer id) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Horario no encontrado"));

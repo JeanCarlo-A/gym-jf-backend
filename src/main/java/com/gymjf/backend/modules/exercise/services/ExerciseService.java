@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.exercise.domain.Exercise;
 import com.gymjf.backend.modules.exercise.dtos.CreateExerciseRequest;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ExerciseService {
 
@@ -32,6 +34,7 @@ public class ExerciseService {
         return mapToResponse(exercise);
     }
 
+    @Transactional
     public ExerciseResponse create(CreateExerciseRequest request) {
         Exercise exercise = Exercise.builder()
                 .name(request.getName())
@@ -46,6 +49,7 @@ public class ExerciseService {
         return mapToResponse(exercise);
     }
 
+    @Transactional
     public ExerciseResponse update(Integer id, UpdateExerciseRequest request) {
         Exercise exercise = exerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado"));
@@ -75,6 +79,7 @@ public class ExerciseService {
         return mapToResponse(exercise);
     }
 
+    @Transactional
     public void delete(Integer id) {
         Exercise exercise = exerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio no encontrado"));

@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.billing.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +40,7 @@ public class AccountReceivableController {
     @PostMapping("")
     public ResponseEntity<AccountReceivableResponse> create(
             @Valid @RequestBody CreateAccountReceivableRequest request) {
-        return ResponseEntity.ok(accountReceivableService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountReceivableService.create(request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

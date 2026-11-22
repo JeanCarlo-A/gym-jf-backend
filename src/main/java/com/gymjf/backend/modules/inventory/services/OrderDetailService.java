@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.inventory.domain.Order;
 import com.gymjf.backend.modules.inventory.domain.OrderDetail;
@@ -20,6 +21,7 @@ import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OrderDetailService {
 
@@ -50,6 +52,7 @@ public class OrderDetailService {
         return mapToResponse(orderDetail);
     }
 
+    @Transactional
     public OrderDetailResponse create(CreateOrderDetailRequest request) {
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
@@ -70,6 +73,7 @@ public class OrderDetailService {
         return mapToResponse(orderDetail);
     }
 
+    @Transactional
     public OrderDetailResponse update(Integer id, UpdateOrderDetailRequest request) {
         OrderDetail orderDetail = orderDetailRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Detalle de pedido no encontrado"));
@@ -86,6 +90,7 @@ public class OrderDetailService {
         return mapToResponse(orderDetail);
     }
 
+    @Transactional
     public void delete(Integer id) {
         OrderDetail orderDetail = orderDetailRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Detalle de pedido no encontrado"));

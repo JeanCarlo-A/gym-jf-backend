@@ -3,6 +3,7 @@ package com.gymjf.backend.modules.memberships.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
@@ -20,6 +21,7 @@ import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserSubscriptionService {
 
@@ -48,6 +50,7 @@ public class UserSubscriptionService {
         return mapToResponse(subscription);
     }
 
+    @Transactional
     public UserSubscriptionResponse create(CreateUserSubscriptionRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
@@ -68,6 +71,7 @@ public class UserSubscriptionService {
         return mapToResponse(subscription);
     }
 
+    @Transactional
     public UserSubscriptionResponse update(Integer id, UpdateUserSubscriptionRequest request) {
         UserSubscription subscription = userSubscriptionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Suscripción no encontrada"));
@@ -87,6 +91,7 @@ public class UserSubscriptionService {
         return mapToResponse(subscription);
     }
 
+    @Transactional
     public void delete(Integer id) {
         UserSubscription subscription = userSubscriptionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Suscripción no encontrada"));

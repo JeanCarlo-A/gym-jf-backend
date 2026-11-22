@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
@@ -19,6 +20,7 @@ import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AccountReceivableService {
 
@@ -46,6 +48,7 @@ public class AccountReceivableService {
         return mapToResponse(accountReceivable);
     }
 
+    @Transactional
     public AccountReceivableResponse create(CreateAccountReceivableRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
@@ -65,6 +68,7 @@ public class AccountReceivableService {
         return mapToResponse(accountReceivable);
     }
 
+    @Transactional
     public AccountReceivableResponse update(Integer id, UpdateAccountReceivableRequest request) {
         AccountReceivable accountReceivable = accountReceivableRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuenta por cobrar no encontrada"));
@@ -86,6 +90,7 @@ public class AccountReceivableService {
         return mapToResponse(accountReceivable);
     }
 
+    @Transactional
     public void delete(Integer id) {
         AccountReceivable accountReceivable = accountReceivableRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuenta por cobrar no encontrada"));

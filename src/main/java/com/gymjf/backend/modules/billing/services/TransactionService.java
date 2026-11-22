@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
@@ -21,6 +22,7 @@ import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TransactionService {
 
@@ -49,6 +51,7 @@ public class TransactionService {
         return mapToResponse(transaction);
     }
 
+    @Transactional
     public TransactionResponse create(CreateTransactionRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
@@ -76,6 +79,7 @@ public class TransactionService {
         return mapToResponse(transaction);
     }
 
+    @Transactional
     public TransactionResponse update(Integer id, UpdateTransactionRequest request) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Transacción no encontrada"));
@@ -93,6 +97,7 @@ public class TransactionService {
         return mapToResponse(transaction);
     }
 
+    @Transactional
     public void delete(Integer id) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Transacción no encontrada"));

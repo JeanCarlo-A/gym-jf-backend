@@ -3,6 +3,7 @@ package com.gymjf.backend.modules.nutrition.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.nutrition.domain.LocalIngredient;
 import com.gymjf.backend.modules.nutrition.dtos.CreateLocalIngredientRequest;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class LocalIngredientService {
 
@@ -31,6 +33,7 @@ public class LocalIngredientService {
         return mapToResponse(ingredient);
     }
 
+    @Transactional
     public LocalIngredientResponse create(CreateLocalIngredientRequest request) {
         LocalIngredient ingredient = LocalIngredient.builder()
                 .name(request.getName())
@@ -42,6 +45,7 @@ public class LocalIngredientService {
         return mapToResponse(ingredient);
     }
 
+    @Transactional
     public LocalIngredientResponse update(Integer id, UpdateLocalIngredientRequest request) {
         LocalIngredient ingredient = localIngredientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ingrediente no encontrado"));
@@ -58,6 +62,7 @@ public class LocalIngredientService {
         return mapToResponse(ingredient);
     }
 
+    @Transactional
     public void delete(Integer id) {
         LocalIngredient ingredient = localIngredientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ingrediente no encontrado"));

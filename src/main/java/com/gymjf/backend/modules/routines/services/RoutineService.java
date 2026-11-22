@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
@@ -18,6 +19,7 @@ import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class RoutineService {
 
@@ -45,6 +47,7 @@ public class RoutineService {
         return mapToResponse(routine);
     }
 
+    @Transactional
     public RoutineResponse create(CreateRoutineRequest request) {
         currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
@@ -61,6 +64,7 @@ public class RoutineService {
         return mapToResponse(routine);
     }
 
+    @Transactional
     public RoutineResponse update(Integer id, UpdateRoutineRequest request) {
         Routine routine = routineRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
@@ -79,6 +83,7 @@ public class RoutineService {
         return mapToResponse(routine);
     }
 
+    @Transactional
     public void delete(Integer id) {
         Routine routine = routineRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));

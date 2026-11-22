@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.memberships.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +39,7 @@ public class UserSubscriptionController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<UserSubscriptionResponse> create(@Valid @RequestBody CreateUserSubscriptionRequest request) {
-        return ResponseEntity.ok(userSubscriptionService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userSubscriptionService.create(request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

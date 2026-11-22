@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
@@ -18,6 +19,7 @@ import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AnthropometricRecordService {
 
@@ -46,6 +48,7 @@ public class AnthropometricRecordService {
         return mapToResponse(record);
     }
 
+    @Transactional
     public AnthropometricRecordResponse create(CreateAnthropometricRecordRequest request) {
         currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
@@ -71,6 +74,7 @@ public class AnthropometricRecordService {
         return mapToResponse(record);
     }
 
+    @Transactional
     public AnthropometricRecordResponse update(Integer id, UpdateAnthropometricRecordRequest request) {
         AnthropometricRecord record = anthropometricRecordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ficha antropométrica no encontrada"));
@@ -125,6 +129,7 @@ public class AnthropometricRecordService {
         return mapToResponse(record);
     }
 
+    @Transactional
     public void delete(Integer id) {
         AnthropometricRecord record = anthropometricRecordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ficha antropométrica no encontrada"));

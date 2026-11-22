@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.biometrics.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +39,7 @@ public class AnthropometricRecordController {
     @PostMapping("")
     public ResponseEntity<AnthropometricRecordResponse> create(
             @Valid @RequestBody CreateAnthropometricRecordRequest request) {
-        return ResponseEntity.ok(anthropometricRecordService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(anthropometricRecordService.create(request));
     }
 
     @PutMapping("/{id}")

@@ -3,6 +3,7 @@ package com.gymjf.backend.modules.nutrition.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
@@ -19,6 +20,7 @@ import com.gymjf.backend.shared.domain.exceptions.ConflictException;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class FavoriteRecipeService {
 
@@ -34,6 +36,7 @@ public class FavoriteRecipeService {
                 .toList();
     }
 
+    @Transactional
     public FavoriteRecipeResponse create(CreateFavoriteRecipeRequest request) {
         currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
@@ -56,6 +59,7 @@ public class FavoriteRecipeService {
         return mapToResponse(favoriteRecipe);
     }
 
+    @Transactional
     public void delete(Integer id) {
         FavoriteRecipe favoriteRecipe = favoriteRecipeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Favorito no encontrado"));

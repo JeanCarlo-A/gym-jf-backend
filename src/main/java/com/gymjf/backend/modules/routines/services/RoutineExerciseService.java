@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.exercise.domain.Exercise;
 import com.gymjf.backend.modules.exercise.repositories.ExerciseRepository;
@@ -20,6 +21,7 @@ import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class RoutineExerciseService {
 
@@ -50,6 +52,7 @@ public class RoutineExerciseService {
         return mapToResponse(routineExercise);
     }
 
+    @Transactional
     public RoutineExerciseResponse create(CreateRoutineExerciseRequest request) {
         Routine routine = routineRepository.findById(request.getRoutineId())
                 .orElseThrow(() -> new ResourceNotFoundException("Rutina no encontrada"));
@@ -71,6 +74,7 @@ public class RoutineExerciseService {
         return mapToResponse(routineExercise);
     }
 
+    @Transactional
     public RoutineExerciseResponse update(Integer id, UpdateRoutineExerciseRequest request) {
         RoutineExercise routineExercise = routineExerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio de rutina no encontrado"));
@@ -93,6 +97,7 @@ public class RoutineExerciseService {
         return mapToResponse(routineExercise);
     }
 
+    @Transactional
     public void delete(Integer id) {
         RoutineExercise routineExercise = routineExerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ejercicio de rutina no encontrado"));

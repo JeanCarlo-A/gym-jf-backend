@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.inventory.domain.Product;
 import com.gymjf.backend.modules.inventory.dtos.CreateProductRequest;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProductService {
 
@@ -32,6 +34,7 @@ public class ProductService {
         return mapToResponse(product);
     }
 
+    @Transactional
     public ProductResponse create(CreateProductRequest request) {
         Product product = Product.builder()
                 .name(request.getName())
@@ -47,6 +50,7 @@ public class ProductService {
         return mapToResponse(product);
     }
 
+    @Transactional
     public ProductResponse update(Integer id, UpdateProductRequest request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
@@ -75,6 +79,7 @@ public class ProductService {
         return mapToResponse(product);
     }
 
+    @Transactional
     public void delete(Integer id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));

@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.routines.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +37,7 @@ public class RoutineController {
 
     @PostMapping("")
     public ResponseEntity<RoutineResponse> create(@Valid @RequestBody CreateRoutineRequest request) {
-        return ResponseEntity.ok(routineService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(routineService.create(request));
     }
 
     @PutMapping("/{id}")

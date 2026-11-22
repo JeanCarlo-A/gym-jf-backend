@@ -3,6 +3,7 @@ package com.gymjf.backend.modules.nutrition.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class RecipeService {
 
@@ -34,6 +36,7 @@ public class RecipeService {
         return mapToResponse(recipe);
     }
 
+    @Transactional
     public RecipeResponse create(CreateRecipeRequest request) {
         User user = null;
         if (request.getUserId() != null) {
@@ -56,6 +59,7 @@ public class RecipeService {
         return mapToResponse(recipe);
     }
 
+    @Transactional
     public RecipeResponse update(Integer id, UpdateRecipeRequest request) {
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Receta no encontrada"));
@@ -89,6 +93,7 @@ public class RecipeService {
         return mapToResponse(recipe);
     }
 
+    @Transactional
     public void delete(Integer id) {
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Receta no encontrada"));

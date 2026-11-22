@@ -4,14 +4,13 @@ import java.time.LocalTime;
 
 import com.gymjf.backend.modules.reservations.domain.WeekDay;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
 public class CreateScheduleRequest {
     @NotBlank(message = "La actividad es obligatoria")
+    @Size(max = 45, message = "La actividad no puede superar los 45 caracteres")
     private String activity;
 
     @NotNull(message = "El día de la semana es obligatorio")
@@ -24,6 +23,6 @@ public class CreateScheduleRequest {
     private LocalTime endTime;
 
     @NotNull(message = "El aforo máximo es obligatorio")
-    @Positive(message = "El aforo máximo debe ser positivo")
+    @Positive(message = "El aforo máximo debe ser mayor que cero")
     private Integer maxCapacity;
 }

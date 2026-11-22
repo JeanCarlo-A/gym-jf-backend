@@ -1,7 +1,6 @@
 package com.gymjf.backend.modules.routines.dtos;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
@@ -16,6 +15,7 @@ public class CreateRoutineExerciseRequest {
     private Integer reps;
 
     @NotNull(message = "El descanso es obligatorio")
+    @PositiveOrZero(message = "El descanso no puede ser negativo")
     private Integer restSeconds;
 
     @NotNull(message = "La rutina es obligatoria")

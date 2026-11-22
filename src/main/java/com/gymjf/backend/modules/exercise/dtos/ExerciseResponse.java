@@ -23,6 +23,6 @@ public class ExerciseResponse {
 
     private String videoUrl;
 
-    private boolean isForHome;
+    private Boolean isForHome;
 
 }

@@ -2,6 +2,7 @@ package com.gymjf.backend.modules.memberships.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class SubscriptionPlanController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<SubscriptionPlanResponse> create(@Valid @RequestBody CreateSubscriptionPlanRequest request) {
-        return ResponseEntity.ok(subscriptionPlanService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(subscriptionPlanService.create(request));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

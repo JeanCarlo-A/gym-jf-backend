@@ -22,8 +22,8 @@ TCU de la UCR para el Gimnasio J.F. Este documento es **solo del backend** (API 
 | T1 | Ningún endpoint valida rol; sin ownership (cualquier usuario lee/edita datos de otro, incluida antropometría — Ley 8968) | ☑ Corregido (2026-11-22): ADMIN escribe en catálogos y finanzas; el CUSTOMER solo ve y crea lo suyo (403 si toca datos ajenos). Falta el endpoint `/me` (Fase 2.1) |
 | T2 | Errores de triggers (`SQLSTATE 45000`: aforo, stock) salen como **500 "Error interno"** y pierden el mensaje | Alto — rompe evidencias de Reservations/Inventory |
 | T3 | No hay forma de crear un ADMIN (register fuerza CUSTOMER) | Alto |
-| T4 | Sin `@Transactional`; todos los `Update*Request` sin validación; faltan `@Size`/`@Positive`/`@Digits` | Medio |
-| T5 | Desajustes entidad↔SQL: `User` (nombre 100/150, correo 150/100), `Exercise` (nombre 100 vs 45, descripción 100 vs 255) | Medio |
+| T4 | Sin `@Transactional`; todos los `Update*Request` sin validación; faltan `@Size`/`@Positive`/`@Digits` | ☑ Corregido (2026-11-22) |
+| T5 | Desajustes entidad↔SQL: `User` (nombre 100/150, correo 150/100), `Exercise` (nombre 100 vs 45, descripción 100 vs 255) | ☑ Corregido (2026-11-22): la entidad se alineó con el SQL |
 | T6 | `PUT` cambia el estado de un pago, pero el trigger de saldo es solo `AFTER INSERT` → aprobar un pago no actualiza el saldo | ☑ Corregido (2026-11-22): triggers `AFTER UPDATE`/`AFTER DELETE` en `transacciones` |
 | T7 | Sin CORS, perfiles dev/prod, `show-sql` siempre activo, Swagger público, sin paginación, sin actuator, creates devuelven 200 (no 201) | Medio |
 | T8 | Solo 1 test (`contextLoads`, necesita BD viva) | Medio |
@@ -78,7 +78,7 @@ Las evidencias de fases posteriores se agregan aquí (E-17, E-18…), una por m�
 Resuelve T1 y T4–T9. Va **antes** de las reglas de negocio porque todas dependen de roles y de saber quién es el usuario.
 
 1. ☑ **Roles (~8 h) — hecho el 2026-11-22:** `@EnableMethodSecurity`, `@PreAuthorize` por endpoint (admin vs cliente), exponer el id del usuario autenticado (principal propio) para ownership → `/me` y filtros por dueño.
-2. **Validación (~8 h):** `@Size`/`@Positive`/`@Digits` según longitudes SQL, validar los `Update*Request`, `@Transactional` en servicios, 201 en creates, corregir T5 y `forHome`.
+2. ☑ **Validación (~8 h) — hecho el 2026-11-22:** `@Size`/`@Positive`/`@Digits` según longitudes SQL, validar los `Update*Request`, `@Transactional` en servicios, 201 en creates, corregir T5 y `forHome`.
 3. **Configuración (~6 h):** CORS, perfiles dev/prod (`show-sql` solo en dev), Swagger gating, actuator + healthcheck Docker, quitar `JwtProperties` muerto, paginación en listados grandes.
 4. **Tests (~6 h):** Testcontainers MySQL + pruebas de servicio y seguridad para lo crítico.
 
@@ -152,6 +152,7 @@ El CRUD aparece como hecho porque el código existe; solo está probado donde ha
 | 2026-11-12 a 2026-11-22 | (las registra Jean en el sistema de la U) | P0.3: generación e integración de las evidencias E-10…E-16 (PDFs #5…#11), corrección de `sp_procesar_pago_sinpe` y `sp_cancelar_reserva`, PDFs sin comentarios en las capturas de código, `docs/TCU Gimnacio JF/` aplanada (rutas de `docker-compose.yml` actualizadas), guía de evidencias, Spring Boot 4.1.3 | E-10…E-16 (#5…#11, subidas) | Fase 1 |
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Corrección de bugs conocidos: `Indices y Triggers.sql` suma 5 triggers (`trg_actualizar_saldo_cxc_pago_update`, `trg_restaurar_saldo_cxc_pago_delete`, `trg_validar_stock_pedido_update`, `trg_actualizar_stock_pedido_update`, `trg_restaurar_stock_pedido_delete`). Probados con SQL: aprobar/rechazar/editar/eliminar un pago ajusta el saldo y el estado de la cuenta; editar/eliminar un detalle ajusta el stock y rechaza cantidades sin existencias (409) | — | Fase 1 |
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.1 Roles y propiedad: `AuthUser` (usuario autenticado con id), `CurrentUser`, `@EnableMethodSecurity`, `@PreAuthorize('ADMIN')` en las escrituras de catálogos, suscripciones, cuentas por cobrar, transacciones, horarios y en PUT/DELETE de pedidos y detalles; los servicios filtran por dueño (admin ve todo, cliente solo lo propio, 403 si pide datos de otro). El cliente no puede crear reservas/pedidos con estado distinto de PENDING ni marcar rutinas como hechas por admin. Probado en Docker con 38 comprobaciones (admin + 2 clientes) | — | Fase 1.2 (validación) |
+| 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.2 Validación: `@Size`/`@Positive`/`@Digits` según las columnas del SQL en los DTOs de creación **y de actualización** (altura en metros, máx. 9.99); `@Transactional` en todos los servicios (lecturas `readOnly`); los POST de creación (y el registro) responden 201; alineadas las entidades `User` y `Exercise` con el SQL; la respuesta de ejercicios ahora devuelve `isForHome` (antes `forHome`). Probado en Docker con 27 comprobaciones nuevas (más las 38 de permisos), incluido el 409 de stock al editar un detalle | — | Fase 1.3 (configuración) |
 
 **Horas acumuladas TCU:** las lleva Jean en el sistema de la U (el plan partió de 100 / 300).
 
