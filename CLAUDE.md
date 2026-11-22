@@ -18,7 +18,7 @@ Docker: `docker compose up -d --build` levanta MySQL (host `127.0.0.1:3307`, roo
 
 Estado y pendientes del proyecto: [docs/PLAN_BACKEND.md](docs/PLAN_BACKEND.md) (backend, se termina primero; incluye backlog de evidencias y bitácora de sesiones) y [../PLAN_FRONTEND.md](../PLAN_FRONTEND.md) (app Flutter, empieza al cerrar el backend). Al terminar una sesión, actualizar la bitácora y las casillas del plan correspondiente.
 
-No hay linter configurado. Solo existe `BackendApplicationTests` (context load), que **requiere una MySQL accesible y `.env` válido**.
+No hay linter configurado. Los tests de integración (`SecurityAccessTest`, `ValidationTest`, `DatabaseRulesTest`, `PaginationTest`, `BackendApplicationTests`) heredan de `AbstractIntegrationTest`, que levanta una MySQL desechable con **Testcontainers** usando los mismos scripts de `docker/mysql/sql/` (los triggers se prueban de verdad). **Requieren Docker Desktop abierto**, pero no `.env` ni una BD local; el primer arranque tarda ~40 s (descarga `mysql:8.4`). Todo test nuevo de la API debe extender `AbstractIntegrationTest` (trae `admin()`, `registerCustomer()` y los atajos `GET/POST/PUT/DELETE`).
 
 Swagger UI: `/swagger-ui.html` (springdoc); OpenAPI en `/v3/api-docs`.
 

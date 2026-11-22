@@ -26,7 +26,7 @@ TCU de la UCR para el Gimnasio J.F. Este documento es **solo del backend** (API 
 | T5 | Desajustes entidad↔SQL: `User` (nombre 100/150, correo 150/100), `Exercise` (nombre 100 vs 45, descripción 100 vs 255) | ☑ Corregido (2026-11-22): la entidad se alineó con el SQL |
 | T6 | `PUT` cambia el estado de un pago, pero el trigger de saldo es solo `AFTER INSERT` → aprobar un pago no actualiza el saldo | ☑ Corregido (2026-11-22): triggers `AFTER UPDATE`/`AFTER DELETE` en `transacciones` |
 | T7 | Sin CORS, perfiles dev/prod, `show-sql` siempre activo, Swagger público, sin paginación, sin actuator, creates devuelven 200 (no 201) | ☑ Corregido (2026-11-22): CORS, perfiles dev/prod, actuator + healthcheck, 201 y paginación en reservas, pedidos, pagos y fichas |
-| T8 | Solo 1 test (`contextLoads`, necesita BD viva) | Medio |
+| T8 | Solo 1 test (`contextLoads`, necesita BD viva) | ☑ Corregido (2026-11-22): 23 tests de integración con Testcontainers (MySQL desechable con los scripts reales) |
 | T9 | `JwtProperties` es código muerto; sin refresh ni logout | Parcial: `JwtProperties` eliminado (2026-11-22); refresh/logout no entran en los RF |
 | T10 | Los procedimientos `sp_*` nunca se llaman desde Java | Medio |
 
@@ -80,7 +80,7 @@ Resuelve T1 y T4–T9. Va **antes** de las reglas de negocio porque todas depend
 1. ☑ **Roles (~8 h) — hecho el 2026-11-22:** `@EnableMethodSecurity`, `@PreAuthorize` por endpoint (admin vs cliente), exponer el id del usuario autenticado (principal propio) para ownership → `/me` y filtros por dueño.
 2. ☑ **Validación (~8 h) — hecho el 2026-11-22:** `@Size`/`@Positive`/`@Digits` según longitudes SQL, validar los `Update*Request`, `@Transactional` en servicios, 201 en creates, corregir T5 y `forHome`.
 3. ☑ **Configuración (~6 h) — hecho el 2026-11-22:** CORS, perfiles dev/prod (`show-sql` solo en dev), Swagger gating, actuator + healthcheck Docker, quitar `JwtProperties` muerto, paginación en listados grandes.
-4. **Tests (~6 h):** Testcontainers MySQL + pruebas de servicio y seguridad para lo crítico.
+4. ☑ **Tests (~6 h) — hecho el 2026-11-22:** Testcontainers MySQL + pruebas de servicio y seguridad para lo crítico.
 
 Cierre → **E-17** (roles y seguridad con pruebas 401/403).
 
@@ -154,6 +154,7 @@ El CRUD aparece como hecho porque el código existe; solo está probado donde ha
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.1 Roles y propiedad: `AuthUser` (usuario autenticado con id), `CurrentUser`, `@EnableMethodSecurity`, `@PreAuthorize('ADMIN')` en las escrituras de catálogos, suscripciones, cuentas por cobrar, transacciones, horarios y en PUT/DELETE de pedidos y detalles; los servicios filtran por dueño (admin ve todo, cliente solo lo propio, 403 si pide datos de otro). El cliente no puede crear reservas/pedidos con estado distinto de PENDING ni marcar rutinas como hechas por admin. Probado en Docker con 38 comprobaciones (admin + 2 clientes) | — | Fase 1.2 (validación) |
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.2 Validación: `@Size`/`@Positive`/`@Digits` según las columnas del SQL en los DTOs de creación **y de actualización** (altura en metros, máx. 9.99); `@Transactional` en todos los servicios (lecturas `readOnly`); los POST de creación (y el registro) responden 201; alineadas las entidades `User` y `Exercise` con el SQL; la respuesta de ejercicios ahora devuelve `isForHome` (antes `forHome`). Probado en Docker con 27 comprobaciones nuevas (más las 38 de permisos), incluido el 409 de stock al editar un detalle | — | Fase 1.3 (configuración) |
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.3 Configuración: perfiles `dev` (predeterminado) y `prod` (sin SQL en el log ni Swagger), CORS configurable, actuator con `/actuator/health` público y healthcheck del backend en Docker, `JwtProperties` eliminado, paginación (`PageResponse`, máx. 100, orden por defecto más reciente) en reservas, pedidos, transacciones y fichas antropométricas, error 400 si se ordena por un campo inexistente. Probado en Docker (dev y prod) con 14 comprobaciones nuevas más las 65 anteriores | — | Fase 1.4 (tests) |
+| 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.4 Tests: `AbstractIntegrationTest` (Testcontainers MySQL 8.4 con esquema, índices, triggers y procedimientos reales) y 23 pruebas en 5 clases: `SecurityAccessTest` (401/403, propiedad, sin escalada de privilegios), `ValidationTest` (límites, 201/400/409, formato de errores), `DatabaseRulesTest` (aforo, stock y saldo vía triggers), `PaginationTest` (páginas, máximo, actuator) y `BackendApplicationTests`. Ya no dependen de `.env` ni de una BD local (sí de Docker). Se comprobó que una prueba falla si se quita un `@PreAuthorize` | — | **Fase 1 completa**; falta la evidencia E-17 |
 
 **Horas acumuladas TCU:** las lleva Jean en el sistema de la U (el plan partió de 100 / 300).
 
