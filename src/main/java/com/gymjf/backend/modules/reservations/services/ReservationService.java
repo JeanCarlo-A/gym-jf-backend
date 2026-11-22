@@ -1,7 +1,5 @@
 package com.gymjf.backend.modules.reservations.services;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +15,9 @@ import com.gymjf.backend.modules.reservations.dtos.UpdateReservationRequest;
 import com.gymjf.backend.modules.reservations.repositories.ReservationRepository;
 import com.gymjf.backend.modules.reservations.repositories.ScheduleRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.gymjf.backend.shared.domain.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
@@ -31,17 +32,16 @@ public class ReservationService {
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
 
-    public List<ReservationResponse> getAll() {
-        return (currentUser.isAdmin() ? reservationRepository.findAll() : reservationRepository.findByUserId(currentUser.id())).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public PageResponse<ReservationResponse> getAll(Pageable pageable) {
+        Page<Reservation> page = currentUser.isAdmin()
+                ? reservationRepository.findAll(pageable)
+                : reservationRepository.findByUserId(currentUser.id(), pageable);
+        return PageResponse.from(page, this::mapToResponse);
     }
 
-    public List<ReservationResponse> getByUserId(Integer userId) {
+    public PageResponse<ReservationResponse> getByUserId(Integer userId, Pageable pageable) {
         currentUser.requireOwnerOrAdmin(userId);
-        return reservationRepository.findByUserId(userId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return PageResponse.from(reservationRepository.findByUserId(userId, pageable), this::mapToResponse);
     }
 
     public ReservationResponse getById(Integer id) {

@@ -95,3 +95,10 @@ Para que el backend local apunte al contenedor, en `backend/.env` usa `DB_URL=jd
 | Cambié un `.sql` y no se nota | Los scripts solo corren con volumen vacío: `down -v` y `up -d --build` |
 | `Cannot connect to the Docker daemon` | Docker Desktop está cerrado |
 | Acentos rotos en mensajes de triggers (`mÃ¡ximo`) | La BD se creó sin la imagen propia de MySQL. `docker compose down -v` y `up -d --build` (usa `docker/mysql/`, que fuerza utf8mb4 al ejecutar los scripts) |
+
+## Perfiles, CORS y salud
+
+- **Perfil `dev` (predeterminado):** muestra las consultas SQL en el log y deja Swagger abierto. Es el que usa `docker compose up` normal.
+- **Perfil `prod`:** sin consultas en el log y sin Swagger (`/swagger-ui` y `/v3/api-docs` responden 404). Se activa con `SPRING_PROFILES_ACTIVE=prod docker compose up -d`.
+- **CORS:** `CORS_ALLOWED_ORIGINS` (lista separada por comas, admite `http://localhost:*`). En dev ya permite `localhost`; en producción hay que listar el origen exacto o dejarlo vacío (la app móvil no lo necesita).
+- **Salud:** `GET /actuator/health` (público) responde `{"status":"UP"}`; Docker lo usa como healthcheck del backend (`docker compose ps` muestra `healthy`). Los demás endpoints de actuator están cerrados.

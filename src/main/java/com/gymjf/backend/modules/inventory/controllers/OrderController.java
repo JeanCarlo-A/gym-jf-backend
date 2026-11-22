@@ -1,6 +1,5 @@
 package com.gymjf.backend.modules.inventory.controllers;
 
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +11,10 @@ import com.gymjf.backend.modules.inventory.dtos.UpdateOrderRequest;
 import com.gymjf.backend.modules.inventory.services.OrderService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import com.gymjf.backend.shared.domain.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -23,11 +26,13 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping("")
-    public ResponseEntity<List<OrderResponse>> getAll(@RequestParam(required = false) Integer userId) {
+    public ResponseEntity<PageResponse<OrderResponse>> getAll(
+            @RequestParam(required = false) Integer userId,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         if (userId != null) {
-            return ResponseEntity.ok(orderService.getByUserId(userId));
+            return ResponseEntity.ok(orderService.getByUserId(userId, pageable));
         }
-        return ResponseEntity.ok(orderService.getAll());
+        return ResponseEntity.ok(orderService.getAll(pageable));
     }
 
     @GetMapping("/{id}")

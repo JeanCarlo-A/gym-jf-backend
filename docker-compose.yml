@@ -39,8 +39,18 @@ services:
       DB_USERNAME: root
       DB_PASSWORD: ${DOCKER_DB_PASSWORD:-gymjf_dev}
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en backend/.env}
+      # dev (predeterminado): Swagger abierto y SQL en el log. En producción usar prod.
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:*,http://127.0.0.1:*}
     ports:
       - "8080:8080"
+    healthcheck:
+      # /actuator/health debe responder {"status":"UP"} (la imagen no trae curl: se usa bash)
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '\"status\":\"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
 volumes:
   gym_jf_data:

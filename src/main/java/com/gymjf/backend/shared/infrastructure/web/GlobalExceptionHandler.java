@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -97,6 +98,12 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMissingParameter(MissingServletRequestParameterException ex) {
         return problem(HttpStatus.BAD_REQUEST, "Solicitud inválida",
                 "Falta el parámetro obligatorio '%s'".formatted(ex.getParameterName()));
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ProblemDetail handleInvalidSort(PropertyReferenceException ex) {
+        return problem(HttpStatus.BAD_REQUEST, "Solicitud inválida",
+                "No se puede ordenar por '%s'".formatted(ex.getPropertyName()));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

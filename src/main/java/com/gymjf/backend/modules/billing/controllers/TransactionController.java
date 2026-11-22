@@ -1,6 +1,5 @@
 package com.gymjf.backend.modules.billing.controllers;
 
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +11,10 @@ import com.gymjf.backend.modules.billing.dtos.UpdateTransactionRequest;
 import com.gymjf.backend.modules.billing.services.TransactionService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import com.gymjf.backend.shared.domain.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -23,12 +26,13 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping("")
-    public ResponseEntity<List<TransactionResponse>> getAll(
-            @RequestParam(required = false) Integer userId) {
+    public ResponseEntity<PageResponse<TransactionResponse>> getAll(
+            @RequestParam(required = false) Integer userId,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         if (userId != null) {
-            return ResponseEntity.ok(transactionService.getByUserId(userId));
+            return ResponseEntity.ok(transactionService.getByUserId(userId, pageable));
         }
-        return ResponseEntity.ok(transactionService.getAll());
+        return ResponseEntity.ok(transactionService.getAll(pageable));
     }
 
     @GetMapping("/{id}")

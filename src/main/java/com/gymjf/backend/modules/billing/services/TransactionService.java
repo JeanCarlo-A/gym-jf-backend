@@ -1,7 +1,5 @@
 package com.gymjf.backend.modules.billing.services;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +15,9 @@ import com.gymjf.backend.modules.billing.dtos.UpdateTransactionRequest;
 import com.gymjf.backend.modules.billing.repositories.AccountReceivableRepository;
 import com.gymjf.backend.modules.billing.repositories.TransactionRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.gymjf.backend.shared.domain.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
@@ -31,17 +32,16 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final AccountReceivableRepository accountReceivableRepository;
 
-    public List<TransactionResponse> getAll() {
-        return (currentUser.isAdmin() ? transactionRepository.findAll() : transactionRepository.findByUserId(currentUser.id())).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public PageResponse<TransactionResponse> getAll(Pageable pageable) {
+        Page<Transaction> page = currentUser.isAdmin()
+                ? transactionRepository.findAll(pageable)
+                : transactionRepository.findByUserId(currentUser.id(), pageable);
+        return PageResponse.from(page, this::mapToResponse);
     }
 
-    public List<TransactionResponse> getByUserId(Integer userId) {
+    public PageResponse<TransactionResponse> getByUserId(Integer userId, Pageable pageable) {
         currentUser.requireOwnerOrAdmin(userId);
-        return transactionRepository.findByUserId(userId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return PageResponse.from(transactionRepository.findByUserId(userId, pageable), this::mapToResponse);
     }
 
     public TransactionResponse getById(Integer id) {

@@ -1,7 +1,5 @@
 package com.gymjf.backend.modules.biometrics.services;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +12,9 @@ import com.gymjf.backend.modules.biometrics.dtos.CreateAnthropometricRecordReque
 import com.gymjf.backend.modules.biometrics.dtos.UpdateAnthropometricRecordRequest;
 import com.gymjf.backend.modules.biometrics.repositories.AnthropometricRecordRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.gymjf.backend.shared.domain.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
@@ -27,17 +28,16 @@ public class AnthropometricRecordService {
     private final CurrentUser currentUser;
     private final UserRepository userRepository;
 
-    public List<AnthropometricRecordResponse> getAll() {
-        return (currentUser.isAdmin() ? anthropometricRecordRepository.findAll() : anthropometricRecordRepository.findByUserIdOrderByRecordDateDesc(currentUser.id())).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public PageResponse<AnthropometricRecordResponse> getAll(Pageable pageable) {
+        Page<AnthropometricRecord> page = currentUser.isAdmin()
+                ? anthropometricRecordRepository.findAll(pageable)
+                : anthropometricRecordRepository.findByUserId(currentUser.id(), pageable);
+        return PageResponse.from(page, this::mapToResponse);
     }
 
-    public List<AnthropometricRecordResponse> getByUserId(Integer userId) {
+    public PageResponse<AnthropometricRecordResponse> getByUserId(Integer userId, Pageable pageable) {
         currentUser.requireOwnerOrAdmin(userId);
-        return anthropometricRecordRepository.findByUserIdOrderByRecordDateDesc(userId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return PageResponse.from(anthropometricRecordRepository.findByUserId(userId, pageable), this::mapToResponse);
     }
 
     public AnthropometricRecordResponse getById(Integer id) {

@@ -1,6 +1,5 @@
 package com.gymjf.backend.modules.reservations.controllers;
 
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +11,10 @@ import com.gymjf.backend.modules.reservations.dtos.UpdateReservationRequest;
 import com.gymjf.backend.modules.reservations.services.ReservationService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import com.gymjf.backend.shared.domain.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -23,11 +26,13 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @GetMapping("")
-    public ResponseEntity<List<ReservationResponse>> getAll(@RequestParam(required = false) Integer userId) {
+    public ResponseEntity<PageResponse<ReservationResponse>> getAll(
+            @RequestParam(required = false) Integer userId,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         if (userId != null) {
-            return ResponseEntity.ok(reservationService.getByUserId(userId));
+            return ResponseEntity.ok(reservationService.getByUserId(userId, pageable));
         }
-        return ResponseEntity.ok(reservationService.getAll());
+        return ResponseEntity.ok(reservationService.getAll(pageable));
     }
 
     @GetMapping("/{id}")

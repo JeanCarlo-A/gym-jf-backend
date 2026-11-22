@@ -1,6 +1,5 @@
 package com.gymjf.backend.modules.biometrics.controllers;
 
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +11,10 @@ import com.gymjf.backend.modules.biometrics.dtos.UpdateAnthropometricRecordReque
 import com.gymjf.backend.modules.biometrics.services.AnthropometricRecordService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import com.gymjf.backend.shared.domain.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,13 +25,13 @@ public class AnthropometricRecordController {
     private final AnthropometricRecordService anthropometricRecordService;
 
     @GetMapping("")
-    public ResponseEntity<List<AnthropometricRecordResponse>> getAll(
-            @RequestParam(required = false) Integer userId) {
+    public ResponseEntity<PageResponse<AnthropometricRecordResponse>> getAll(
+            @RequestParam(required = false) Integer userId,
+            @PageableDefault(size = 20, sort = "recordDate", direction = Sort.Direction.DESC) Pageable pageable) {
         if (userId != null) {
-            return ResponseEntity.ok(anthropometricRecordService.getByUserId(userId));
+            return ResponseEntity.ok(anthropometricRecordService.getByUserId(userId, pageable));
         }
-
-        return ResponseEntity.ok(anthropometricRecordService.getAll());
+        return ResponseEntity.ok(anthropometricRecordService.getAll(pageable));
     }
 
     @GetMapping("/{id}")

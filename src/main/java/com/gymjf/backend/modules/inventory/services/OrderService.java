@@ -1,7 +1,5 @@
 package com.gymjf.backend.modules.inventory.services;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +13,9 @@ import com.gymjf.backend.modules.inventory.dtos.OrderResponse;
 import com.gymjf.backend.modules.inventory.dtos.UpdateOrderRequest;
 import com.gymjf.backend.modules.inventory.repositories.OrderRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.gymjf.backend.shared.domain.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
@@ -28,17 +29,16 @@ public class OrderService {
     private final CurrentUser currentUser;
     private final UserRepository userRepository;
 
-    public List<OrderResponse> getAll() {
-        return (currentUser.isAdmin() ? orderRepository.findAll() : orderRepository.findByUserId(currentUser.id())).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public PageResponse<OrderResponse> getAll(Pageable pageable) {
+        Page<Order> page = currentUser.isAdmin()
+                ? orderRepository.findAll(pageable)
+                : orderRepository.findByUserId(currentUser.id(), pageable);
+        return PageResponse.from(page, this::mapToResponse);
     }
 
-    public List<OrderResponse> getByUserId(Integer userId) {
+    public PageResponse<OrderResponse> getByUserId(Integer userId, Pageable pageable) {
         currentUser.requireOwnerOrAdmin(userId);
-        return orderRepository.findByUserId(userId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return PageResponse.from(orderRepository.findByUserId(userId, pageable), this::mapToResponse);
     }
 
     public OrderResponse getById(Integer id) {
