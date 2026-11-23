@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import com.gymjf.backend.shared.domain.dtos.PageResponse;
+import org.springdoc.core.annotations.ParameterObject;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -27,7 +28,7 @@ public class AnthropometricRecordController {
     @GetMapping("")
     public ResponseEntity<PageResponse<AnthropometricRecordResponse>> getAll(
             @RequestParam(required = false) Integer userId,
-            @PageableDefault(size = 20, sort = "recordDate", direction = Sort.Direction.DESC) Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 20, sort = "recordDate", direction = Sort.Direction.DESC) Pageable pageable) {
         if (userId != null) {
             return ResponseEntity.ok(anthropometricRecordService.getByUserId(userId, pageable));
         }

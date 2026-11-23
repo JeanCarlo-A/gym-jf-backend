@@ -60,6 +60,7 @@ TCU de la UCR para el Gimnasio J.F. Este documento es **solo del backend** (API 
 | E-14 | **Nutrition** (recetas, ingredientes, receta-ingredientes, favoritas) | ☑ | P0.1 |
 | E-15 | **Billing** (cuentas por cobrar + transacciones; trigger de saldo) | ☑ | P0.2 |
 | E-16 | **Inventory** (productos, pedidos, detalle; triggers de stock) | ☑ | P0.2 |
+| E-17 | **Roles y seguridad** (Fase 1: 401/403, datos privados entre clientes, paginación, pruebas automáticas) | ☑ PDF **#12** completo (con las 3 capturas de Workbench y terminal); falta subirlo al sistema de la U | Fase 1 |
 
 Las evidencias de fases posteriores se agregan aquí (E-17, E-18…), una por módulo o hito al cerrarlo.
 
@@ -155,6 +156,7 @@ El CRUD aparece como hecho porque el código existe; solo está probado donde ha
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.2 Validación: `@Size`/`@Positive`/`@Digits` según las columnas del SQL en los DTOs de creación **y de actualización** (altura en metros, máx. 9.99); `@Transactional` en todos los servicios (lecturas `readOnly`); los POST de creación (y el registro) responden 201; alineadas las entidades `User` y `Exercise` con el SQL; la respuesta de ejercicios ahora devuelve `isForHome` (antes `forHome`). Probado en Docker con 27 comprobaciones nuevas (más las 38 de permisos), incluido el 409 de stock al editar un detalle | — | Fase 1.3 (configuración) |
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.3 Configuración: perfiles `dev` (predeterminado) y `prod` (sin SQL en el log ni Swagger), CORS configurable, actuator con `/actuator/health` público y healthcheck del backend en Docker, `JwtProperties` eliminado, paginación (`PageResponse`, máx. 100, orden por defecto más reciente) en reservas, pedidos, transacciones y fichas antropométricas, error 400 si se ordena por un campo inexistente. Probado en Docker (dev y prod) con 14 comprobaciones nuevas más las 65 anteriores | — | Fase 1.4 (tests) |
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.4 Tests: `AbstractIntegrationTest` (Testcontainers MySQL 8.4 con esquema, índices, triggers y procedimientos reales) y 23 pruebas en 5 clases: `SecurityAccessTest` (401/403, propiedad, sin escalada de privilegios), `ValidationTest` (límites, 201/400/409, formato de errores), `DatabaseRulesTest` (aforo, stock y saldo vía triggers), `PaginationTest` (páginas, máximo, actuator) y `BackendApplicationTests`. Ya no dependen de `.env` ni de una BD local (sí de Docker). Se comprobó que una prueba falla si se quita un `@PreAuthorize` | — | **Fase 1 completa**; falta la evidencia E-17 |
+| 2026-11-22 | (las registra Jean en el sistema de la U) | E-17: generado el PDF #12 (5 capturas de código y 13 pruebas en Swagger: 401 sin token, 403 del cliente en catálogos, datos de salud privados entre clientes, estado PENDING forzado, el admin ve todo, paginación). Swagger ahora muestra `page`/`size`/`sort` en los listados paginados (`@ParameterObject`) | E-17 (#12, completo, 18 páginas) | Subirlo; luego Fase 2.1 |
 
 **Horas acumuladas TCU:** las lleva Jean en el sistema de la U (el plan partió de 100 / 300).
 

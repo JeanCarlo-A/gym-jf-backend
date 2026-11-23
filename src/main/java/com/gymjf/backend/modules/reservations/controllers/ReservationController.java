@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import com.gymjf.backend.shared.domain.dtos.PageResponse;
+import org.springdoc.core.annotations.ParameterObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -28,7 +29,7 @@ public class ReservationController {
     @GetMapping("")
     public ResponseEntity<PageResponse<ReservationResponse>> getAll(
             @RequestParam(required = false) Integer userId,
-            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         if (userId != null) {
             return ResponseEntity.ok(reservationService.getByUserId(userId, pageable));
         }
