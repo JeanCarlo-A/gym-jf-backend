@@ -14,4 +14,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsById(Integer id);
 
     boolean existsByEmail(String email);
+
+    boolean existsByRol(com.gymjf.backend.modules.auth.domain.Rol rol);
 }

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.gymjf.backend.shared.domain.exceptions.BadRequestException;
 import com.gymjf.backend.shared.domain.exceptions.ConflictException;
 import com.gymjf.backend.shared.domain.exceptions.InvalidCredentialsException;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
@@ -61,6 +62,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ProblemDetail handleConflict(ConflictException ex) {
         return problem(HttpStatus.CONFLICT, "Conflicto", ex.getMessage());
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ProblemDetail handleBadRequest(BadRequestException ex) {
+        return problem(HttpStatus.BAD_REQUEST, "Solicitud inválida", ex.getMessage());
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)

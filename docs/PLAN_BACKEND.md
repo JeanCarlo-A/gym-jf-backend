@@ -62,6 +62,8 @@ TCU de la UCR para el Gimnasio J.F. Este documento es **solo del backend** (API 
 | E-16 | **Inventory** (productos, pedidos, detalle; triggers de stock) | ☑ | P0.2 |
 | E-17 | **Roles y seguridad** (Fase 1: 401/403, datos privados entre clientes, paginación, pruebas automáticas) | ☑ PDF **#12** completo (con las 3 capturas de Workbench y terminal); falta subirlo al sistema de la U | Fase 1 |
 
+| E-18 | **Usuarios y acceso** (Fase 2.1: perfil, objetivo físico, consentimiento, admins, recuperación de contraseña) | ☑ PDF **#13** completo (21 págs., con las 4 capturas); falta subirlo al sistema de la U | Fase 2.1 |
+
 Las evidencias de fases posteriores se agregan aquí (E-17, E-18…), una por módulo o hito al cerrarlo.
 
 ---
@@ -91,7 +93,7 @@ Orden por prioridad para el cliente. Cada módulo termina con su evidencia.
 
 | Orden | Módulo | Contenido principal | Horas | Evidencia |
 |---|---|---|---|---|
-| 2.1 | Auth/Usuarios | `/me` y perfil, objetivo físico (enum), bootstrap admin, consentimiento informado, recuperación de contraseña (requiere correo) | ~18 | E-18 |
+| 2.1 | Auth/Usuarios | ☑ código y pruebas hechos (2026-11-22): `/me` y perfil, objetivo físico (enum), primer admin por variables de entorno + alta de admins, consentimiento informado, recuperación de contraseña por correo (Brevo) | ~18 | E-18 |
 | 2.2 | Memberships | tipos de plan/pase diario, `endDate` calculado, ajustes globales (toggle de restricción), filtro de acceso por plan, caducidad 00:00, job de vencimiento, `sp_renovar_suscripcion` | ~25 | E-19 |
 | 2.3 | Billing | aprobar/rechazar pago (el saldo ya se ajusta en la BD, ver T6), referencia duplicada, monto ≤ saldo, doble confirmación, CxC desde compras/suscripciones, umbral de morosidad + job + bloqueo, cierre de caja, filtros, dashboard/reportes, `sp_procesar_pago_sinpe` | ~35 | E-20 |
 | 2.4 | Reservations | disponibilidad, cancelación con anticipación, duplicados, aforo también en update, QR check-in, contador en vivo, no-show + sanciones, lista de espera, Zumba con fecha y saldo | ~35 | E-21 |
@@ -157,6 +159,7 @@ El CRUD aparece como hecho porque el código existe; solo está probado donde ha
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.3 Configuración: perfiles `dev` (predeterminado) y `prod` (sin SQL en el log ni Swagger), CORS configurable, actuator con `/actuator/health` público y healthcheck del backend en Docker, `JwtProperties` eliminado, paginación (`PageResponse`, máx. 100, orden por defecto más reciente) en reservas, pedidos, transacciones y fichas antropométricas, error 400 si se ordena por un campo inexistente. Probado en Docker (dev y prod) con 14 comprobaciones nuevas más las 65 anteriores | — | Fase 1.4 (tests) |
 | 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 1.4 Tests: `AbstractIntegrationTest` (Testcontainers MySQL 8.4 con esquema, índices, triggers y procedimientos reales) y 23 pruebas en 5 clases: `SecurityAccessTest` (401/403, propiedad, sin escalada de privilegios), `ValidationTest` (límites, 201/400/409, formato de errores), `DatabaseRulesTest` (aforo, stock y saldo vía triggers), `PaginationTest` (páginas, máximo, actuator) y `BackendApplicationTests`. Ya no dependen de `.env` ni de una BD local (sí de Docker). Se comprobó que una prueba falla si se quita un `@PreAuthorize` | — | **Fase 1 completa**; falta la evidencia E-17 |
 | 2026-11-22 | (las registra Jean en el sistema de la U) | E-17: generado el PDF #12 (5 capturas de código y 13 pruebas en Swagger: 401 sin token, 403 del cliente en catálogos, datos de salud privados entre clientes, estado PENDING forzado, el admin ve todo, paginación). Swagger ahora muestra `page`/`size`/`sort` en los listados paginados (`@ParameterObject`) | E-17 (#12, completo, 18 páginas) | Subirlo; luego Fase 2.1 |
+| 2026-11-22 | (las registra Jean en el sistema de la U) | Fase 2.1 (código): `GET/PUT /users/me` (nombre, fecha de nacimiento, foto, objetivo físico como enum `LOSE_WEIGHT`/`GAIN_MUSCLE`/`TONE`/`MAINTAIN`/`ENDURANCE`), `PUT /users/me/password`, `POST /users/me/health-consent` (sin consentimiento no se guardan medidas: 409), `GET/POST /users` solo ADMIN (alta de otros admins), primer admin al arrancar con `BOOTSTRAP_ADMIN_EMAIL/PASSWORD`, `POST /auth/forgot-password` y `/auth/reset-password` (código de un solo uso, vence a los 30 min, solo se guarda su hash; misma respuesta exista o no el correo). Correo por Brevo (SMTP) o simulado en dev. BD: columna `consentimiento_salud_at` y tabla `tokens_recuperacion` (script `Migracion 2.1 Usuarios.sql` para BD existentes). El health de actuator ignora el correo. 30 pruebas en verde (7 nuevas) | — | Evidencia E-18 (#13) |
 
 **Horas acumuladas TCU:** las lleva Jean en el sistema de la U (el plan partió de 100 / 300).
 
@@ -166,7 +169,7 @@ El CRUD aparece como hecho porque el código existe; solo está probado donde ha
 
 1. **Altura de antropometría:** ¿metros (SQL actual) o cm (doc de requerimientos)? — decidir en 2.8.
 2. **Almacenamiento de imágenes:** se asume Supabase Storage (C4 dice "Supabase / Cloudinary") — 2.9.
-3. **Recuperación de contraseña** necesita correo (SMTP o servicio): elegir proveedor — 2.1.
+3. ~~Recuperación de contraseña necesita correo~~ **Decidido (2026-11-22): Brevo por SMTP.** En dev el correo se simula (sale en el log); en producción se activa con `MAIL_ENABLED=true` y los datos de Brevo (ver `.env.example`). Jean debe crear la cuenta gratuita, verificar el remitente y generar la clave SMTP solo cuando se vaya a producción.
 4. **Calidad extra** no exigida por los RF (Testcontainers, paginación, actuator): incluida porque protege el cierre; R-4.1 limita el alcance funcional, no la calidad técnica.
 
 ---

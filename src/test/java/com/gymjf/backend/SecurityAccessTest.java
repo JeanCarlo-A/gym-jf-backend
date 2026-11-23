@@ -55,7 +55,7 @@ class SecurityAccessTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("Un cliente no ve, edita ni borra la ficha de salud de otro; el admin sí la ve")
     void fichaDeSaludEsPrivada() throws Exception {
-        Session a = registerCustomer();
+        Session a = registerCustomerWithConsent();
         Session b = registerCustomer();
         Integer id = create("/api/v1/anthropometric-records", a, ficha(a.id()));
 

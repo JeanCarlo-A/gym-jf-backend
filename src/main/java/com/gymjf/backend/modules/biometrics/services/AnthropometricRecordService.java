@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import com.gymjf.backend.shared.domain.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 import com.gymjf.backend.shared.infrastructure.security.CurrentUser;
+import com.gymjf.backend.shared.domain.exceptions.ConflictException;
 import com.gymjf.backend.shared.domain.exceptions.ResourceNotFoundException;
 
 @Service
@@ -53,6 +54,10 @@ public class AnthropometricRecordService {
         currentUser.requireOwnerOrAdmin(request.getUserId());
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+        if (user.getHealthConsentAt() == null) {
+            throw new ConflictException("Antes de registrar medidas corporales debes aceptar el consentimiento informado "
+                    + "sobre el uso de tus datos de salud (POST /api/v1/users/me/health-consent)");
+        }
 
         AnthropometricRecord record = AnthropometricRecord.builder()
                 .user(user)

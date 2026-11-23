@@ -10,9 +10,22 @@ CREATE TABLE IF NOT EXISTS usuarios (
   foto_perfil_url VARCHAR(255) NULL,
   objetivo_fisico VARCHAR(255) NULL,
   rol VARCHAR(45) NOT NULL,
+  consentimiento_salud_at TIMESTAMP NULL,
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE INDEX correo_UNIQUE (correo ASC)
+);
+
+CREATE TABLE IF NOT EXISTS tokens_recuperacion (
+  id INT NOT NULL AUTO_INCREMENT,
+  usuario_id INT NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  expira_at TIMESTAMP NOT NULL,
+  usado TINYINT(1) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE INDEX token_hash_UNIQUE (token_hash ASC),
+  CONSTRAINT fk_tokens_usuarios FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS fichas_antropometricas (

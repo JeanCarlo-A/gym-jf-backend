@@ -31,9 +31,12 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Base de las pruebas de integración: levanta una MySQL desechable (Testcontainers) con los
- * mismos scripts SQL que usa Docker (esquema, índices, triggers y procedimientos), así que las
- * reglas que viven en la BD se prueban de verdad. No necesita .env ni una BD local; sí Docker.
+ * Base de las pruebas de integración: levanta una MySQL desechable
+ * (Testcontainers) con los
+ * mismos scripts SQL que usa Docker (esquema, índices, triggers y
+ * procedimientos), así que las
+ * reglas que viven en la BD se prueban de verdad. No necesita .env ni una BD
+ * local; sí Docker.
  * El contenedor se comparte entre todas las clases de prueba.
  */
 @SpringBootTest
@@ -41,6 +44,7 @@ import tools.jackson.databind.json.JsonMapper;
 @ActiveProfiles("prod") // sin SQL en el log
 public abstract class AbstractIntegrationTest {
 
+    @SuppressWarnings("resource")
     private static final MySQLContainer MYSQL = new MySQLContainer("mysql:8.4")
             .withDatabaseName("gym_jf")
             .withCopyFileToContainer(MountableFile.forHostPath("docker/mysql/charset.cnf"),
@@ -81,7 +85,10 @@ public abstract class AbstractIntegrationTest {
 
     private static Session admin;
 
-    /** El administrador no se puede registrar por la API (siempre nace CUSTOMER): se inserta directo. */
+    /**
+     * El administrador no se puede registrar por la API (siempre nace CUSTOMER): se
+     * inserta directo.
+     */
     protected synchronized Session admin() throws Exception {
         if (admin == null) {
             String email = "admin-" + UUID.randomUUID() + "@test.com";
@@ -100,6 +107,13 @@ public abstract class AbstractIntegrationTest {
                 .andReturn();
         JsonNode node = json.readTree(result.getResponse().getContentAsString());
         return new Session(node.get("token").asString(), node.get("id").asInt());
+    }
+
+    /** Cliente que ya aceptó el consentimiento informado (necesario para guardar fichas de salud). */
+    protected Session registerCustomerWithConsent() throws Exception {
+        Session session = registerCustomer();
+        POST("/api/v1/users/me/health-consent", session, null);
+        return session;
     }
 
     protected Session login(String email, String password) throws Exception {

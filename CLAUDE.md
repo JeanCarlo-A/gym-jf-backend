@@ -26,6 +26,7 @@ Swagger UI: `/swagger-ui.html` (springdoc); OpenAPI en `/v3/api-docs`.
 
 - Copiar `.env.example` a `.env` (no versionado) con `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`. `application.properties` lo importa con `spring.config.import=optional:file:.env[.properties]`, por lo que debe ejecutarse desde la carpeta `backend/`.
 - BD MySQL `gym_jf`. **`ddl-auto=validate`**: el esquema (tablas, índices, triggers) se crea con los scripts SQL de `docker/mysql/sql/` (versionados; Docker los ejecuta al crear el volumen); Hibernate solo valida. Cambiar una entidad `@Entity` exige que la tabla ya coincida, o la app no arranca.
+- Fase 2.1: el correo (recuperación de contraseña) usa la interfaz `EmailSender`: simulado en el log en dev (`application.mail.enabled=false`) y Brevo por SMTP con `MAIL_ENABLED=true` (variables `MAIL_*` en `.env.example`). El primer ADMIN se crea al arrancar con `BOOTSTRAP_ADMIN_EMAIL/PASSWORD`. Guardar fichas antropométricas exige que el dueño haya aceptado el consentimiento informado (`POST /users/me/health-consent`). Una BD existente se actualiza con `docker/mysql/sql/Migracion 2.1 Usuarios.sql`.
 - Lombok y `spring-boot-configuration-processor` se declaran como `annotationProcessorPaths` en `maven-compiler-plugin` (pom.xml); si se agrega otro procesador de anotaciones, hay que añadirlo ahí.
 
 ## Arquitectura

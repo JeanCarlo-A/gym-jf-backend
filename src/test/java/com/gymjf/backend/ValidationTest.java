@@ -56,7 +56,7 @@ class ValidationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("Ficha antropométrica: altura en metros, pesos positivos y con decimales válidos")
     void fichaAntropometrica() throws Exception {
-        Session cliente = registerCustomer();
+        Session cliente = registerCustomerWithConsent();
         Map<String, Object> base = Map.of("userId", cliente.id(), "weight", 70, "height", 1.75, "recordDate", "2030-01-01");
         create("/api/v1/anthropometric-records", cliente, base);
 

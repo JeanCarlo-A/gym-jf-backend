@@ -36,12 +36,16 @@ public class User {
     @Column(name = "foto_perfil_url")
     private String profilePictureUrl;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "objetivo_fisico")
-    private String physicalGoal;
+    private PhysicalGoal physicalGoal;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rol", nullable = false)
     private Rol rol;
+
+    @Column(name = "consentimiento_salud_at")
+    private LocalDateTime healthConsentAt;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
