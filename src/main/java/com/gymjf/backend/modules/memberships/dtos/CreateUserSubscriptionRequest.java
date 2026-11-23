@@ -15,12 +15,10 @@ public class CreateUserSubscriptionRequest {
     @NotNull(message = "El plan es obligatorio")
     private Integer planId;
 
-    @NotNull(message = "La fecha de inicio es obligatoria")
+    /** Opcional: por defecto hoy. La fecha de vencimiento no se envía: se calcula con la duración del plan. */
     private LocalDate startDate;
 
-    @NotNull(message = "La fecha de vencimiento es obligatoria")
-    private LocalDate endDate;
-
+    /** Opcional: por defecto PENDING (pendiente de pago). El administrador puede registrarla ya ACTIVE. */
     private SubscriptionStatus status;
 
 }

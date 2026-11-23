@@ -53,7 +53,8 @@ DELIMITER //
 
 CREATE PROCEDURE sp_renovar_suscripcion(
     IN p_usuario_id INT,
-    IN p_plan_id INT
+    IN p_plan_id INT,
+    IN p_hoy DATE
 )
 BEGIN
     DECLARE v_precio DECIMAL(10,2);
@@ -74,14 +75,18 @@ BEGIN
     FROM planes_suscripcion
     WHERE id = p_plan_id;
 
-    SET v_fecha_inicio = CURRENT_DATE;
-    SET v_fecha_fin = DATE_ADD(v_fecha_inicio, INTERVAL v_duracion DAY);
+    -- La renovacion empieza hoy, o el dia siguiente al vencimiento si todavia tiene una suscripcion vigente.
+    -- La duracion incluye el dia de inicio (30 dias desde el 1 vencen el 30; el pase diario vence el mismo dia).
+    SELECT COALESCE(DATE_ADD(MAX(fecha_vencimiento), INTERVAL 1 DAY), p_hoy) INTO v_fecha_inicio
+    FROM suscripciones_usuario
+    WHERE usuario_id = p_usuario_id AND estado IN ('ACTIVE', 'PENDING') AND fecha_vencimiento >= p_hoy;
+    SET v_fecha_fin = DATE_ADD(v_fecha_inicio, INTERVAL (v_duracion - 1) DAY);
 
     INSERT INTO suscripciones_usuario (fecha_inicio, fecha_vencimiento, estado, plan_id, usuario_id)
     VALUES (v_fecha_inicio, v_fecha_fin, 'PENDING', p_plan_id, p_usuario_id);
 
     INSERT INTO cuentas_por_cobrar (deuda_total, saldo_pendiente, fecha_emision, estado_morosidad, usuario_id)
-    VALUES (v_precio, v_precio, v_fecha_inicio, 'OVERDUE', p_usuario_id);
+    VALUES (v_precio, v_precio, p_hoy, 'OVERDUE', p_usuario_id);
 
     COMMIT;
 END//

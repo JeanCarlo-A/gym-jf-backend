@@ -1,6 +1,9 @@
 package com.gymjf.backend.modules.memberships.controllers;
 
 import java.util.List;
+import java.util.Map;
+
+import com.gymjf.backend.modules.memberships.dtos.RenewSubscriptionRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +43,19 @@ public class UserSubscriptionController {
     @PostMapping("")
     public ResponseEntity<UserSubscriptionResponse> create(@Valid @RequestBody CreateUserSubscriptionRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userSubscriptionService.create(request));
+    }
+
+    /** Compra o renueva un plan (queda PENDING hasta que se pague). El cliente solo para sí mismo. */
+    @PostMapping("/renew")
+    public ResponseEntity<UserSubscriptionResponse> renew(@Valid @RequestBody RenewSubscriptionRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userSubscriptionService.renew(request));
+    }
+
+    /** Ejecuta ya la revisión de vencimientos que corre sola todos los días a las 00:00. */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/expire-due")
+    public ResponseEntity<Map<String, Integer>> expireDue() {
+        return ResponseEntity.ok(Map.of("expired", userSubscriptionService.expireDue()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

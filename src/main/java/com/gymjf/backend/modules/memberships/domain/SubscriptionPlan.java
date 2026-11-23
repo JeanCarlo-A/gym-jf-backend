@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,5 +37,10 @@ public class SubscriptionPlan {
 
     @Column(name = "duracion_dias", nullable = false)
     private Integer durationDays;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo", nullable = false, length = 20)
+    @Builder.Default
+    private PlanType type = PlanType.MEMBERSHIP;
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gymjf.backend.modules.memberships.domain.PlanType;
 import com.gymjf.backend.modules.memberships.domain.SubscriptionPlan;
 import com.gymjf.backend.modules.memberships.dtos.CreateSubscriptionPlanRequest;
 import com.gymjf.backend.modules.memberships.dtos.SubscriptionPlanResponse;
@@ -39,7 +40,9 @@ public class SubscriptionPlanService {
                 .planName(request.getPlanName())
                 .price(request.getPrice())
                 .durationDays(request.getDurationDays())
+                .type(request.getType() != null ? request.getType() : PlanType.MEMBERSHIP)
                 .build();
+        applyDayPassRule(plan);
 
         subscriptionPlanRepository.save(plan);
 
@@ -60,6 +63,10 @@ public class SubscriptionPlanService {
         if (request.getDurationDays() != null) {
             plan.setDurationDays(request.getDurationDays());
         }
+        if (request.getType() != null) {
+            plan.setType(request.getType());
+        }
+        applyDayPassRule(plan);
 
         subscriptionPlanRepository.save(plan);
 
@@ -73,8 +80,16 @@ public class SubscriptionPlanService {
         subscriptionPlanRepository.delete(plan);
     }
 
+    /** El pase diario siempre dura 1 día (vence a las 00:00 del día siguiente). */
+    private void applyDayPassRule(SubscriptionPlan plan) {
+        if (plan.getType() == PlanType.DAY_PASS) {
+            plan.setDurationDays(1);
+        }
+    }
+
     private SubscriptionPlanResponse mapToResponse(SubscriptionPlan plan) {
         return SubscriptionPlanResponse.builder()
+                .type(plan.getType())
                 .id(plan.getId())
                 .planName(plan.getPlanName())
                 .price(plan.getPrice())

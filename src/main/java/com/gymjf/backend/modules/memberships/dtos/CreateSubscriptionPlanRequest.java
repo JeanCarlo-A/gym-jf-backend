@@ -2,6 +2,8 @@ package com.gymjf.backend.modules.memberships.dtos;
 
 import java.math.BigDecimal;
 
+import com.gymjf.backend.modules.memberships.domain.PlanType;
+
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -19,5 +21,8 @@ public class CreateSubscriptionPlanRequest {
     @NotNull(message = "La duración en días es obligatoria")
     @Positive(message = "La duración en días debe ser mayor que cero")
     private Integer durationDays;
+
+    /** Por defecto MEMBERSHIP. El pase diario (DAY_PASS) siempre dura 1 día. */
+    private PlanType type;
 
 }

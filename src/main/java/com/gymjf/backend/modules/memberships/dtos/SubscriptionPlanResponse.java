@@ -2,6 +2,8 @@ package com.gymjf.backend.modules.memberships.dtos;
 
 import java.math.BigDecimal;
 
+import com.gymjf.backend.modules.memberships.domain.PlanType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +18,5 @@ public class SubscriptionPlanResponse {
     private String planName;
     private BigDecimal price;
     private Integer durationDays;
+    private PlanType type;
 }

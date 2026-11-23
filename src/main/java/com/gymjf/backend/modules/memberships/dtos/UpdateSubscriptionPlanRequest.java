@@ -2,6 +2,8 @@ package com.gymjf.backend.modules.memberships.dtos;
 
 import java.math.BigDecimal;
 
+import com.gymjf.backend.modules.memberships.domain.PlanType;
+
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -16,5 +18,7 @@ public class UpdateSubscriptionPlanRequest {
 
     @Positive(message = "La duración en días debe ser mayor que cero")
     private Integer durationDays;
+
+    private PlanType type;
 
 }

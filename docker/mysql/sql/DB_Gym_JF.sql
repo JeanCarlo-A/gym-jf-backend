@@ -51,8 +51,18 @@ CREATE TABLE IF NOT EXISTS planes_suscripcion (
   nombre_plan VARCHAR(45) NOT NULL,
   precio DECIMAL(10,2) NOT NULL,
   duracion_dias INT NOT NULL,
+  tipo VARCHAR(20) NOT NULL DEFAULT 'MEMBERSHIP',
   PRIMARY KEY (id)
 );
+
+CREATE TABLE IF NOT EXISTS ajustes_gimnasio (
+  id INT NOT NULL,
+  modo_acceso VARCHAR(20) NOT NULL DEFAULT 'FREE',
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+);
+
+INSERT IGNORE INTO ajustes_gimnasio (id, modo_acceso) VALUES (1, 'FREE');
 
 CREATE TABLE IF NOT EXISTS suscripciones_usuario (
   id INT NOT NULL AUTO_INCREMENT,
