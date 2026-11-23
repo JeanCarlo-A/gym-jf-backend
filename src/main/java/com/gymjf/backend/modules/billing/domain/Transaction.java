@@ -64,6 +64,9 @@ public class Transaction {
 
     @PrePersist
     protected void onCreate() {
-        this.transactionDate = LocalDateTime.now();
+        // Los servicios la fijan con la hora de Costa Rica (Clock); esto es solo un respaldo
+        if (this.transactionDate == null) {
+            this.transactionDate = LocalDateTime.now();
+        }
     }
 }

@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS suscripciones_usuario (
   estado VARCHAR(45) NOT NULL,
   plan_id INT NOT NULL,
   usuario_id INT NOT NULL,
+  cuenta_por_cobrar_id INT NULL,
   PRIMARY KEY (id),
   CONSTRAINT fk_sub_planes FOREIGN KEY (plan_id) REFERENCES planes_suscripcion (id),
   CONSTRAINT fk_sub_usuarios FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
@@ -180,6 +181,10 @@ CREATE TABLE IF NOT EXISTS cuentas_por_cobrar (
   PRIMARY KEY (id),
   CONSTRAINT fk_cxc_usuarios FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
 );
+
+-- Fase 2.3: la suscripcion queda ligada a la deuda que genera; al pagarla por completo pasa a ACTIVE
+ALTER TABLE suscripciones_usuario
+  ADD CONSTRAINT fk_sub_cxc FOREIGN KEY (cuenta_por_cobrar_id) REFERENCES cuentas_por_cobrar (id);
 
 CREATE TABLE IF NOT EXISTS transacciones (
   id INT NOT NULL AUTO_INCREMENT,

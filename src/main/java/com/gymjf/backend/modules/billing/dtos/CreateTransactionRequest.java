@@ -22,6 +22,9 @@ public class CreateTransactionRequest {
     @NotNull(message = "El método de pago es obligatorio")
     private PaymentMethod paymentMethod;
 
+    /** Doble confirmación del efectivo (R-1.3): el administrador vuelve a escribir el monto y debe coincidir. */
+    private BigDecimal confirmationAmount;
+
     @Size(max = 255, message = "El número de referencia no puede superar los 255 caracteres")
     private String referenceNumber;
 

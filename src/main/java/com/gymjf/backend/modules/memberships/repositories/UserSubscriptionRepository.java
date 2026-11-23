@@ -17,6 +17,8 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
 
     Optional<UserSubscription> findTopByUserIdOrderByIdDesc(Integer userId);
 
+    List<UserSubscription> findByAccountReceivableId(Integer accountReceivableId);
+
     /** Suscripción activa que cubre la fecha dada (la de vencimiento más lejana si hay varias). */
     Optional<UserSubscription> findFirstByUserIdAndStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByEndDateDesc(
             Integer userId, SubscriptionStatus status, LocalDate start, LocalDate end);

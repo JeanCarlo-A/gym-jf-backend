@@ -20,4 +20,6 @@ public class UserSubscriptionResponse {
     private LocalDate startDate;
     private LocalDate endDate;
     private SubscriptionStatus status;
+    /** Deuda asociada (null si el administrador la registró ya pagada). */
+    private Integer accountReceivableId;
 }

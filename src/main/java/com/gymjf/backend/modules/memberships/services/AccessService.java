@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
+import com.gymjf.backend.modules.billing.dtos.DelinquencyResponse;
+import com.gymjf.backend.modules.billing.services.DelinquencyService;
 import com.gymjf.backend.modules.memberships.domain.AccessMode;
 import com.gymjf.backend.modules.memberships.domain.SubscriptionStatus;
 import com.gymjf.backend.modules.memberships.domain.UserSubscription;
@@ -28,6 +30,7 @@ public class AccessService {
     private final GymSettingsService gymSettingsService;
     private final CurrentUser currentUser;
     private final Clock clock;
+    private final DelinquencyService delinquencyService;
 
     public AccessCheckResponse check(Integer userId) {
         currentUser.requireOwnerOrAdmin(userId);
@@ -44,6 +47,14 @@ public class AccessService {
 
         AccessCheckResponse.AccessCheckResponseBuilder response = AccessCheckResponse.builder()
                 .userId(userId).accessMode(mode);
+
+        // Morosidad (RF-5.4.5): con deuda vencida no se entra, aunque tenga plan o el acceso sea libre
+        DelinquencyResponse debt = delinquencyService.evaluateUser(userId);
+        if (debt.isDelinquent()) {
+            return response.allowed(false).delinquent(true)
+                    .reason("Acceso bloqueado por deuda vencida: " + debt.getReason() + ". Debe ponerse al día")
+                    .build();
+        }
         if (valid != null) {
             return response.allowed(true)
                     .reason("Suscripción vigente hasta el " + valid.getEndDate() + " (vence a las 00:00 del día siguiente)")

@@ -3,6 +3,7 @@ package com.gymjf.backend.modules.memberships.domain;
 import java.time.LocalDate;
 
 import com.gymjf.backend.modules.auth.domain.User;
+import com.gymjf.backend.modules.billing.domain.AccountReceivable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,5 +52,10 @@ public class UserSubscription {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private User user;
+
+    /** Deuda que genera la suscripción: al pagarla por completo la suscripción pasa a ACTIVE. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cuenta_por_cobrar_id")
+    private AccountReceivable accountReceivable;
 
 }

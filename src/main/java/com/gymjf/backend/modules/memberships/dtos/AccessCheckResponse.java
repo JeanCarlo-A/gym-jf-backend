@@ -22,4 +22,6 @@ public class AccessCheckResponse {
     private Integer subscriptionId;
     /** Último día en que la suscripción da acceso (vence a las 00:00 del día siguiente). */
     private LocalDate validUntil;
+    /** true si el acceso está bloqueado por deuda vencida (morosidad). */
+    private boolean delinquent;
 }

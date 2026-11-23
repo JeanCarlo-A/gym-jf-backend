@@ -1,5 +1,8 @@
 package com.gymjf.backend.modules.billing.services;
 
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,7 @@ public class AccountReceivableService {
     private final AccountReceivableRepository accountReceivableRepository;
     private final CurrentUser currentUser;
     private final UserRepository userRepository;
+    private final Clock clock;
 
     public List<AccountReceivableResponse> getAll() {
         return (currentUser.isAdmin() ? accountReceivableRepository.findAll() : accountReceivableRepository.findByUserId(currentUser.id())).stream()
@@ -46,6 +50,21 @@ public class AccountReceivableService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cuenta por cobrar no encontrada"));
         currentUser.requireOwnerOrAdmin(accountReceivable.getUser().getId());
         return mapToResponse(accountReceivable);
+    }
+
+    /**
+     * Emite una deuda nueva a nombre del usuario (por una suscripción o una compra). Nace OVERDUE, que en este
+     * sistema significa "pendiente de pago"; la fecha de emisión es hoy en hora de Costa Rica.
+     */
+    @Transactional
+    public AccountReceivable issue(User user, BigDecimal amount) {
+        return accountReceivableRepository.save(AccountReceivable.builder()
+                .user(user)
+                .totalDebt(amount)
+                .pendingBalance(amount)
+                .issueDate(LocalDate.now(clock))
+                .delinquencyStatus(DelinquencyStatus.OVERDUE)
+                .build());
     }
 
     @Transactional

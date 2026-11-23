@@ -85,16 +85,17 @@ class DatabaseRulesTest extends AbstractIntegrationTest {
                 "delinquencyStatus", "OVERDUE"));
 
         Integer pago = create("/api/v1/transactions", admin, Map.of(
-                "userId", cliente.id(), "amount", 400, "paymentMethod", "CASH", "accountReceivableId", cuenta));
+                "userId", cliente.id(), "amount", 400, "confirmationAmount", 400, "paymentMethod", "CASH",
+                "accountReceivableId", cuenta));
         assertEquals(1000.0, saldo(admin, cuenta)); // pendiente: todavía no descuenta
 
-        PUT("/api/v1/transactions/" + pago, admin, Map.of("validationStatus", "APPROVED")).andExpect(status().isOk());
+        POST("/api/v1/transactions/" + pago + "/approve", admin, Map.of()).andExpect(status().isOk());
         assertEquals(600.0, saldo(admin, cuenta));
 
-        PUT("/api/v1/transactions/" + pago, admin, Map.of("validationStatus", "REJECTED")).andExpect(status().isOk());
+        POST("/api/v1/transactions/" + pago + "/reject", admin, Map.of()).andExpect(status().isOk());
         assertEquals(1000.0, saldo(admin, cuenta));
 
-        PUT("/api/v1/transactions/" + pago, admin, Map.of("validationStatus", "APPROVED")).andExpect(status().isOk());
+        POST("/api/v1/transactions/" + pago + "/approve", admin, Map.of()).andExpect(status().isOk());
         DELETE("/api/v1/transactions/" + pago, admin).andExpect(status().isNoContent());
         assertEquals(1000.0, saldo(admin, cuenta)); // borrar un pago aprobado devuelve el saldo
     }

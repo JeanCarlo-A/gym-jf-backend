@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gymjf.backend.modules.auth.domain.User;
 import com.gymjf.backend.modules.auth.repositories.UserRepository;
+import com.gymjf.backend.modules.billing.services.AccountReceivableService;
 import com.gymjf.backend.modules.memberships.domain.SubscriptionPlan;
 import com.gymjf.backend.modules.memberships.domain.SubscriptionStatus;
 import com.gymjf.backend.modules.memberships.domain.UserSubscription;
@@ -39,6 +40,7 @@ public class UserSubscriptionService {
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final UserRepository userRepository;
     private final Clock clock;
+    private final AccountReceivableService accountReceivableService;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -71,12 +73,16 @@ public class UserSubscriptionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Plan de suscripción no encontrado"));
 
         LocalDate start = request.getStartDate() != null ? request.getStartDate() : LocalDate.now(clock);
+        SubscriptionStatus status = request.getStatus() != null ? request.getStatus() : SubscriptionStatus.PENDING;
         UserSubscription subscription = UserSubscription.builder()
                 .user(user)
                 .plan(plan)
                 .startDate(start)
                 .endDate(calculateEndDate(start, plan))
-                .status(request.getStatus() != null ? request.getStatus() : SubscriptionStatus.PENDING)
+                .status(status)
+                // Pendiente de pago = genera su deuda; si el administrador la registra ACTIVE se asume ya pagada
+                .accountReceivable(status == SubscriptionStatus.PENDING
+                        ? accountReceivableService.issue(user, plan.getPrice()) : null)
                 .build();
 
         userSubscriptionRepository.save(subscription);
@@ -168,6 +174,8 @@ public class UserSubscriptionService {
                 .startDate(subscription.getStartDate())
                 .endDate(subscription.getEndDate())
                 .status(subscription.getStatus())
+                .accountReceivableId(subscription.getAccountReceivable() != null
+                        ? subscription.getAccountReceivable().getId() : null)
                 .build();
     }
 }
